@@ -29,6 +29,7 @@ import {
 import Link from 'next/link';
 import { useState } from 'react';
 import { GuideContent, InlineGuideText } from './GuideContent';
+import { GuideSectionNav } from './GuideSectionNav';
 
 interface TopicReaderProps {
   topic: TopicItem;
@@ -38,6 +39,17 @@ export function TopicReader({ topic }: TopicReaderProps) {
   const pillar = getPillarById(topic.pillarId);
   const nextTopic = getNextTopic(topic.slug);
   const prevTopic = getPreviousTopic(topic.slug);
+  const sections = [
+    { id: 'architecture-core-concepts', label: 'Overview' },
+    ...(topic.diagram ? [{ id: 'architecture-diagram', label: 'Diagram' }] : []),
+    { id: 'core-mechanics', label: 'Mechanics' },
+    ...(topic.commands.length ? [{ id: 'command-reference', label: 'Commands' }] : []),
+    ...(topic.productionCode ? [{ id: 'production-configuration', label: 'Configuration' }] : []),
+    ...(topic.gotchas.length ? [{ id: 'production-pitfalls', label: 'Pitfalls' }] : []),
+    ...(topic.interviewQuestions.length ? [{ id: 'interview-questions', label: 'Interview' }] : []),
+    ...(topic.quiz.length ? [{ id: 'knowledge-check', label: 'Quiz' }] : []),
+    ...(topic.references.length ? [{ id: 'guide-references', label: 'References' }] : []),
+  ];
 
   const progress = useProgress();
   const isCompleted = !!progress.completedTopics[topic.id];
@@ -175,6 +187,8 @@ export function TopicReader({ topic }: TopicReaderProps) {
         </div>
       </div>
 
+      <GuideSectionNav sections={sections} />
+
       {/* Personal Notes Drawer */}
       {isNoteDrawerOpen && (
         <div className="my-6 rounded-2xl border border-sky-line bg-surface p-5 shadow-sm animate-fade-in">
@@ -198,7 +212,7 @@ export function TopicReader({ topic }: TopicReaderProps) {
       )}
 
       {/* Section 1: Conceptual Overview */}
-      <section id="architecture-core-concepts" className="my-10 scroll-mt-24">
+      <section id="architecture-core-concepts" tabIndex={-1} className="my-10 scroll-mt-48 xl:scroll-mt-56">
         <h2 className="text-lg font-bold text-ink flex items-start gap-3 mb-6 border-b border-line pb-3 sm:text-xl">
           <BookOpen className="mt-0.5 h-5 w-5 shrink-0 text-sky-ink" aria-hidden="true" />
           1. Architecture & Core Concepts
@@ -208,7 +222,7 @@ export function TopicReader({ topic }: TopicReaderProps) {
 
       {/* Section 2: Architecture Diagram */}
       {topic.diagram && (
-        <section className="my-10">
+        <section id="architecture-diagram" tabIndex={-1} className="my-10 scroll-mt-48 xl:scroll-mt-56">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-ink flex items-center gap-2">
               <Terminal className="h-4 w-4 text-sky-ink" />
@@ -229,7 +243,7 @@ export function TopicReader({ topic }: TopicReaderProps) {
       )}
 
       {/* Section 3: Key Concepts Breakdown */}
-      <section className="my-10">
+      <section id="core-mechanics" tabIndex={-1} className="my-10 scroll-mt-48 xl:scroll-mt-56">
         <h2 className="text-lg font-bold text-ink flex items-center gap-2 mb-4 border-b border-line pb-2">
           <Sparkles className="h-5 w-5 text-amber-ink" />
           2. Under The Hood: Core Mechanics
@@ -251,7 +265,7 @@ export function TopicReader({ topic }: TopicReaderProps) {
 
       {/* Section 4: Production Commands */}
       {topic.commands.length > 0 && (
-        <section className="my-10">
+        <section id="command-reference" tabIndex={-1} className="my-10 scroll-mt-48 xl:scroll-mt-56">
           <h2 className="text-lg font-bold text-ink flex items-center gap-2 mb-4 border-b border-line pb-2">
             <Terminal className="h-5 w-5 text-emerald-ink" />
             3. Production CLI Command Reference
@@ -289,7 +303,7 @@ export function TopicReader({ topic }: TopicReaderProps) {
 
       {/* Section 5: Production Configuration Snippet */}
       {topic.productionCode && (
-        <section className="my-10">
+        <section id="production-configuration" tabIndex={-1} className="my-10 scroll-mt-48 xl:scroll-mt-56">
           <h2 className="text-lg font-bold text-ink flex items-center gap-2 mb-4 border-b border-line pb-2">
             <Terminal className="h-5 w-5 text-indigo-ink" />
             4. Production Configuration & Automation
@@ -323,7 +337,7 @@ export function TopicReader({ topic }: TopicReaderProps) {
 
       {/* Section 6: Production Gotchas & Pitfalls */}
       {topic.gotchas.length > 0 && (
-        <section className="my-10">
+        <section id="production-pitfalls" tabIndex={-1} className="my-10 scroll-mt-48 xl:scroll-mt-56">
           <h2 className="text-lg font-bold text-ink flex items-center gap-2 mb-4 border-b border-line pb-2">
             <AlertTriangle className="h-5 w-5 text-rose-ink" />
             5. Production Gotchas & Common Pitfalls
@@ -352,7 +366,7 @@ export function TopicReader({ topic }: TopicReaderProps) {
 
       {/* Section 7: Senior Platform Interview Questions */}
       {topic.interviewQuestions.length > 0 && (
-        <section className="my-10">
+        <section id="interview-questions" tabIndex={-1} className="my-10 scroll-mt-48 xl:scroll-mt-56">
           <h2 className="text-lg font-bold text-ink flex items-center gap-2 mb-4 border-b border-line pb-2">
             <HelpCircle className="h-5 w-5 text-purple-ink" />
             6. Senior Platform Engineer Interview Questions
@@ -381,7 +395,7 @@ export function TopicReader({ topic }: TopicReaderProps) {
 
       {/* Section 8: Interactive Topic Quiz */}
       {topic.quiz.length > 0 && (
-        <section className="my-10 rounded-2xl border border-line bg-surface p-6 shadow-sm">
+        <section id="knowledge-check" tabIndex={-1} className="my-10 scroll-mt-48 xl:scroll-mt-56 rounded-2xl border border-line bg-surface p-6 shadow-sm">
           <h2 className="text-lg font-bold text-ink flex items-center gap-2 mb-2">
             <Award className="h-5 w-5 text-amber-ink" />
             7. Interactive Knowledge Check
@@ -466,7 +480,7 @@ export function TopicReader({ topic }: TopicReaderProps) {
 
       {/* Section 9: References & Authoritative Sources */}
       {topic.references.length > 0 && (
-        <section className="my-10">
+        <section id="guide-references" tabIndex={-1} className="my-10 scroll-mt-48 xl:scroll-mt-56">
           <h3 className="text-sm font-semibold text-body mb-3">
             Authoritative References & Documentation
           </h3>

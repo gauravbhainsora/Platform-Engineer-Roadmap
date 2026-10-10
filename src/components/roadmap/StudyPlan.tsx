@@ -1,10 +1,13 @@
 import { ALL_TOPICS, getTopicById } from '@/data';
 import { STUDY_PLAN } from '@/data/study-plan';
 import Link from 'next/link';
+import { buildStudyPlanSearchIndex } from '@/lib/study-plan-search';
+import { StudyPlanSearch } from './StudyPlanSearch';
 
 const modules = STUDY_PLAN.stages.flatMap((stage) => stage.modules);
 const moduleById = new Map(modules.map((module) => [module.id, module]));
 const sourceById = new Map(STUDY_PLAN.sources.map((source) => [source.id, source]));
+const searchEntries = buildStudyPlanSearchIndex(STUDY_PLAN, Object.fromEntries(ALL_TOPICS.map((topic) => [topic.id, topic.title])));
 
 function ConceptList({ title, items }: { title: string; items: string[] }) {
   return (
@@ -36,6 +39,8 @@ export function StudyPlan() {
         <ul className="mt-4 list-disc space-y-3 pl-5 text-sm leading-relaxed text-body">{STUDY_PLAN.studyMethod.map((item) => <li key={item}>{item}</li>)}</ul>
         <p className="mt-4 text-sm leading-relaxed text-muted">{STUDY_PLAN.scope}</p>
       </details>
+
+      <StudyPlanSearch entries={searchEntries} />
 
       <nav aria-label="Study plan stages" className="flex flex-wrap gap-2">
         {STUDY_PLAN.stages.map((stage, index) => <a key={stage.id} href={`#stage-${stage.id}`} className="inline-flex min-h-11 items-center rounded-xl border border-line bg-surface px-3 text-sm font-medium text-body hover:bg-hover">{index + 1}. {stage.title}</a>)}

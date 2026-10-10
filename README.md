@@ -10,6 +10,8 @@ Built with modern **Next.js 16 (Turbopack)**, **React 19**, **TypeScript**, and 
 
 Open **Curriculum** (`/topics`) for a six-stage path containing **60 syllabus modules**, prerequisite links, core concepts, advanced details, failure cases, **60 practical labs**, and **six capstones with exit criteria**. All 73 existing technical guides are linked into the path.
 
+Use **Find a study module** to search concepts, advanced details, failure cases, labs, prerequisites, linked guide titles, and reading titles. Filter by stage and open a result to reveal the complete module. Module bookmarks and prerequisite links also open their target automatically. Each technical guide has a sticky section menu for jumping to its available content.
+
 The stages are computing/programming foundations; Linux/network operations; containers/Kubernetes; cloud/IaC/delivery; distributed systems/reliability/security operations; and internal platforms/expert engineering judgment. The path adds Git, programming, SQL, messaging, caches, disaster recovery, operators, multi-tenancy, platform product design, governance, migrations, and explicit specialist extensions.
 
 Download [the complete offline plan](public/platform-engineering-study-plan.txt). Its single content source is `src/data/study-plan.ts`; run `pnpm study-plan:export` after editing the syllabus to regenerate the download. References were reviewed on **2026-10-10**; use documentation matching your installed versions.
