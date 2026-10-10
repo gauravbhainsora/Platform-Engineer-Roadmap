@@ -17,6 +17,10 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       <footer className="border-t border-slate-850 bg-slate-950 py-10 text-center text-xs text-slate-500 font-mono">
         <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-slate-400">
+            <a href="/labs" className="hover:text-white transition-colors">
+              Hands-On Labs
+            </a>
+            <span>•</span>
             <a href="/tools" className="hover:text-white transition-colors">
               DevOps Tools
             </a>

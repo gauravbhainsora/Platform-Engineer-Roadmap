@@ -774,5 +774,142 @@ export const CONTAINERS_TOPICS: TopicItem[] = [
         "explanation": "tmpfs mounts are kept strictly in system RAM for ephemeral or highly sensitive credentials."
       }
     ]
+  },
+  {
+    "id": "containers-gateway-api",
+    "slug": "kubernetes-gateway-api-v1-2",
+    "pillarId": "containers",
+    "branch": "right",
+    "order": 9,
+    "title": "Kubernetes Gateway API v1.2 GA: Beyond Ingress",
+    "subtitle": "Role-oriented networking, HTTPRoute, GRPCRoute, ReferenceGrant & BackendTLSPolicy",
+    "level": "Advanced",
+    "estimatedMinutes": 35,
+    "tags": ["Gateway API", "Kubernetes", "HTTPRoute", "Envoy Gateway", "Cilium", "Networking", "CNCF"],
+    "summary": "Master the next-generation Kubernetes Gateway API v1.2 specification that replaces legacy Ingress with expressive, role-oriented, multi-tenant traffic routing.",
+    "overview": "The legacy Kubernetes Ingress API suffered from architectural limitations: it forced complex traffic policies into non-standard vendor annotations and lacked multi-tenant role separation.\n\nGateway API v1.2 is the official GA standard providing an expressive, role-oriented routing architecture:\n1. Role Separation:\n   - Infrastructure Architect defines the GatewayClass (specifying Envoy, Cilium, or cloud load balancer controllers).\n   - Cluster Operator deploys the Gateway resource (binding IP addresses, listening ports 80/443, and TLS certificates).\n   - Application Developers attach Route resources (HTTPRoute, GRPCRoute, TCPRoute) within their own namespaces.\n2. Cross-Namespace Security with ReferenceGrant:\n   - A Route in namespace 'checkout' cannot arbitrarily route traffic to a Service or Secret in namespace 'payment' unless the target namespace explicitly creates a ReferenceGrant authorizing it.\n3. Advanced Routing & Resilience:\n   - Built-in HTTPRoute retries: Specify retryOn codes (5xx, gateway-error), retry backoff, and max attempts directly in the spec.\n   - Traffic splitting: Native canary weighted routing without ingress controller workarounds.\n   - BackendTLSPolicy: Enforces validated mTLS between Gateway proxies and backend pods using ClusterTrustBundle.",
+    "keyConcepts": [
+      {
+        "title": "Role-Oriented Resource Model",
+        "explanation": "Decouples Gateway infrastructure ownership (Ops) from application routing rules (Devs), eliminating namespace permission conflicts."
+      },
+      {
+        "title": "ReferenceGrant Trust Boundary",
+        "explanation": "A security handshake CRD that explicitly allows cross-namespace routing or secret sharing, preventing unauthorized backend hijacking."
+      }
+    ],
+    "diagram": {
+      "title": "Gateway API Decoupled Architecture",
+      "type": "ascii",
+      "code": "[Platform Admin]              [Dev Team: Storefront]         [Dev Team: Auth]\n       |                                     |                              |\n       v                                     v                              v\n[GatewayClass & Gateway] ------------> [HTTPRoute: /shop] ---------> [HTTPRoute: /login]\n (Port 443 / TLS Cert)                       |                              |\n                                             v                              v\n                                      [Storefront Svc]                 [Auth Svc]\n                                             |                              |\n                                      +------+-------+               +------+-------+\n                                      | Pod 1 | Pod 2|               | Pod 1 | Pod 2|"
+    },
+    "commands": [
+      { "cmd": "kubectl get gatewayclasses,gateways -A", "desc": "List all active Gateway classes and provisioned gateways" },
+      { "cmd": "kubectl get httproutes,grpcroutes -A", "desc": "List all Layer 7 routes attached across namespaces" },
+      { "cmd": "kubectl describe httproute <route-name>", "desc": "Inspect route attachment status, parentRef bindings, and condition errors" }
+    ],
+    "productionCode": {
+      "language": "yaml",
+      "filename": "gateway-api-production.yaml",
+      "code": "apiVersion: gateway.networking.k8s.io/v1\nkind: Gateway\nmetadata:\n  name: edge-gateway\n  namespace: infra-gateway\nspec:\n  gatewayClassName: envoy-gateway\n  listeners:\n  - name: https\n    protocol: HTTPS\n    port: 443\n    tls:\n      mode: Terminate\n      certificateRefs:\n      - kind: Secret\n        name: wildcard-prod-tls\n    allowedRoutes:\n      namespaces:\n        from: Selector\n        selector:\n          matchLabels:\n            gateway-access: \"true\"\n---\napiVersion: gateway.networking.k8s.io/v1\nkind: HTTPRoute\nmetadata:\n  name: order-service-route\n  namespace: order-app\nspec:\n  parentRefs:\n  - name: edge-gateway\n    namespace: infra-gateway\n  hostnames:\n  - \"api.company.com\"\n  rules:\n  - matches:\n    - path:\n        type: PathPrefix\n        value: /v2/orders\n    timeouts:\n      request: 10s\n    retry:\n      codes: [502, 503, 504]\n      attempts: 3\n    backendRefs:\n    - name: order-service-v2\n      port: 8080\n      weight: 90\n    - name: order-service-canary\n      port: 8080\n      weight: 10",
+      "explanation": "Production Gateway API manifest demonstrating multi-tenant listener authorization, path-based routing, automated 5xx retries, and canary traffic weighting."
+    },
+    "gotchas": [
+      {
+        "issue": "HTTPRoute stays in 'Accepted: False' or 'ResolvedRefs: False'",
+        "resolution": "Verify that the Gateway's allowedRoutes selector matches the namespace label of your HTTPRoute, and ensure backend Services exist on specified ports.",
+        "severity": "critical"
+      }
+    ],
+    "interviewQuestions": [
+      {
+        "question": "Why is Kubernetes Gateway API replacing the standard Ingress resource?",
+        "answer": "Ingress combined infrastructure definition and application routing into a single resource, requiring vendor-specific annotations that created lock-in and lacked cross-namespace security. Gateway API cleanly decouples GatewayClass (infra), Gateway (cluster ops), and HTTPRoute (developers) while adding native traffic splitting, retries, and ReferenceGrant security boundaries.",
+        "platformContext": "Core architectural question for Senior/Staff Platform Engineer roles evaluating modernization beyond NGINX Ingress."
+      }
+    ],
+    "references": [
+      { "title": "Kubernetes Gateway API v1.2 Documentation", "url": "https://gateway-api.sigs.k8s.io/", "source": "Kubernetes SIG Network", "type": "official" }
+    ],
+    "quiz": [
+      {
+        "id": "gw-1",
+        "question": "Which Gateway API resource is required to permit a Route in Namespace A to forward traffic to a Service in Namespace B?",
+        "options": ["NetworkPolicy", "ReferenceGrant", "GatewayClass", "ServiceExport"],
+        "answerIndex": 1,
+        "explanation": "ReferenceGrant allows a resource owner in one namespace to explicitly trust cross-namespace references from another namespace."
+      }
+    ]
+  },
+  {
+    "id": "containers-cilium-ebpf-mesh",
+    "slug": "cilium-ebpf-service-mesh-mutual-auth",
+    "pillarId": "containers",
+    "branch": "right",
+    "order": 10,
+    "title": "Sidecarless Service Mesh & eBPF Mutual Auth (Cilium + SPIRE)",
+    "subtitle": "High-performance Linux kernel traffic routing, zero sidecar tax, SPIFFE identity & WireGuard encryption",
+    "level": "Advanced",
+    "estimatedMinutes": 35,
+    "tags": ["Cilium", "eBPF", "Service Mesh", "SPIFFE", "SPIRE", "WireGuard", "Security"],
+    "summary": "Ditch sidecar proxies for kernel-native eBPF networking. Learn how Cilium pairs transparent WireGuard encryption with SPIRE mutual authentication.",
+    "overview": "First-generation service meshes (Istio, Linkerd) rely on injecting an Envoy sidecar proxy into every application pod. At scale, this introduces significant latency (2-4ms added per hop), massive memory overhead (50MB+ per pod across 2,000 pods = 100GB RAM dedicated solely to proxies), and complex lifecycle lockouts during rolling deploys.\n\nCilium eBPF Service Mesh revolutionizes distributed networking:\n1. Kernel-Level Datapath Bypass:\n   - Uses eBPF programs attached to Linux socket layers (sockops) and traffic control (tc) to route TCP packets directly between pod sockets, bypassing the host TCP/IP stack and iptables/kube-proxy entirely.\n2. Decoupled Mutual Authentication:\n   - Authentication: Cilium agents authenticate peer workloads out-of-band using SPIFFE SVID X.509 certificates managed by SPIRE.\n   - Encryption: Traffic between worker nodes is transparently encrypted at Layer 3/4 via kernel WireGuard tunnels.\n3. On-Demand Layer 7 Filtering:\n   - For HTTP header routing, gRPC rate limiting, or JWT validation, Cilium routes packets to a single shared node-level Envoy proxy only when L7 policies are applied, reducing proxy instances from thousands to one per node.",
+    "keyConcepts": [
+      {
+        "title": "Sidecarless Architecture",
+        "explanation": "Delegates networking to the Linux kernel via eBPF programs and a single node-level daemon rather than injecting container proxies into every workload pod."
+      },
+      {
+        "title": "Decoupled Mutual Auth & Encryption",
+        "explanation": "Separates identity verification (TLS handshake via SPIFFE/SPIRE out-of-band) from payload transport (kernel WireGuard encryption), avoiding L7 proxy overhead on pure TCP traffic."
+      }
+    ],
+    "diagram": {
+      "title": "Sidecar vs Cilium eBPF Architecture",
+      "type": "ascii",
+      "code": "[Traditional Sidecar Mesh]                     [Cilium eBPF Service Mesh]\nPod: [App Container] <-> [Envoy Proxy]         Pod: [App Container]\n         | (veth pair)                                   | (eBPF sockops bypass)\n    [Linux Kernel TCP/IP Stack]                  [Linux Kernel eBPF Map]\n         | (iptables / conntrack)                        | (Direct Memory Copy)\n    [Host Network Interface]                     [Host WireGuard Encryption]\n         | (Wire Latency + Proxy Overhead)               | (Near Line-Rate Latency)"
+    },
+    "commands": [
+      { "cmd": "cilium status", "desc": "Check Cilium daemon, eBPF datapath, WireGuard encryption, and Hubble health" },
+      { "cmd": "cilium connectivity test", "desc": "Run comprehensive cluster-wide eBPF network and policy connectivity test" },
+      { "cmd": "hubble observe --namespace default --protocol http", "desc": "Inspect real-time L7 HTTP flow logs without sidecar injection via Hubble" }
+    ],
+    "productionCode": {
+      "language": "yaml",
+      "filename": "cilium-mutual-auth-policy.yaml",
+      "code": "apiVersion: \"cilium.io/v2\"\nkind: CiliumNetworkPolicy\nmetadata:\n  name: secure-payment-mTLS\n  namespace: finance\nspec:\n  endpointSelector:\n    matchLabels:\n      app: payment-processor\n  ingress:\n  - fromEndpoints:\n    - matchLabels:\n        app: order-api\n        tier: backend\n    authentication:\n      mode: \"required\"\n    toPorts:\n    - ports:\n      - port: \"8443\"\n        protocol: TCP\n      rules:\n        http:\n        - method: \"POST\"\n          path: \"/v1/charge\"",
+      "explanation": "CiliumNetworkPolicy requiring cryptographic mutual authentication via SPIRE while enforcing granular Layer 7 path and method restrictions without a sidecar."
+    },
+    "gotchas": [
+      {
+        "issue": "Kernel compatibility failure when enabling Cilium WireGuard or mutual auth",
+        "resolution": "Requires Linux kernel >= 5.10 with CONFIG_BPF, CONFIG_BPF_SYSCALL, and WireGuard module enabled. Upgrade node AMI/kernel.",
+        "severity": "critical"
+      }
+    ],
+    "interviewQuestions": [
+      {
+        "question": "How does Cilium achieve mutual authentication and encryption without injecting sidecars?",
+        "answer": "Cilium decouples authentication from encryption: node Cilium agents perform out-of-band TLS handshakes using SPIFFE/SPIRE certificates to validate identity, while the Linux kernel's WireGuard or IPsec module transparently encrypts packets between nodes at Layer 3. eBPF handles socket routing directly, invoking node-level Envoy only if Layer 7 parsing is required.",
+        "platformContext": "Senior/Staff level question testing deep understanding of modern networking beyond legacy Istio sidecar injection."
+      }
+    ],
+    "references": [
+      { "title": "Cilium Service Mesh & Mutual Auth", "url": "https://docs.cilium.io/en/stable/overview/intro/", "source": "Isovalent / Cilium", "type": "official" }
+    ],
+    "quiz": [
+      {
+        "id": "cil-1",
+        "question": "What is the primary memory and latency advantage of Cilium eBPF mesh compared to sidecar meshes?",
+        "options": [
+          "It eliminates per-pod Envoy memory overhead and skips duplicate userspace-to-kernel context switches",
+          "It compresses all network packets with gzip",
+          "It eliminates DNS queries by hardcoding IP addresses",
+          "It replaces Kubernetes CoreDNS with a custom database"
+        ],
+        "answerIndex": 0,
+        "explanation": "By running at the kernel layer, Cilium eliminates 50MB+ memory per pod and eliminates multiple hops through container veth pairs and userspace sidecar proxies."
+      }
+    ]
   }
 ];

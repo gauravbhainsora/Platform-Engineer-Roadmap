@@ -734,5 +734,148 @@ export const CLOUD_TOPICS: TopicItem[] = [
         "explanation": "IRSA leverages OIDC federation between EKS and AWS STS to grant temporary IAM credentials per pod."
       }
     ]
+  },
+  {
+    "id": "cloud-finops-opencost-focus",
+    "slug": "cloud-finops-opencost-focus-standard",
+    "pillarId": "cloud",
+    "branch": "right",
+    "order": 9,
+    "title": "Cloud FinOps: OpenCost & the FOCUS 1.0 Specification",
+    "subtitle": "Kubernetes cost allocation, multi-cloud billing normalization, unit economics & showback",
+    "level": "Intermediate",
+    "estimatedMinutes": 30,
+    "tags": ["FinOps", "OpenCost", "FOCUS", "Kubernetes", "Cost Optimization", "Cloud", "SRE"],
+    "summary": "Master modern cloud financial management. Normalize multi-cloud bills with FOCUS 1.0 and allocate shared Kubernetes cluster spend to teams using OpenCost.",
+    "overview": "Cloud bills are frequently one of the top operational expenses for engineering organizations, yet engineering teams often lack visibility into how their architecture choices translate into dollars.\n\nFinOps bridges engineering and finance through two complementary standards:\n1. FOCUS (FinOps Open Cost and Usage Specification):\n   - Maintained by the FinOps Foundation, FOCUS standardizes billing data columns across AWS (CUR), Azure, and Google Cloud.\n   - Solves multi-cloud normalization: Fields like BilledCost, EffectiveCost, ProviderName, PricingQuantity, and ChargeCategory are standardized into a single schema.\n2. OpenCost (CNCF Sandbox):\n   - While FOCUS operates at cloud provider invoice level, OpenCost calculates cost allocation inside Kubernetes.\n   - Combines node-level cloud pricing with Prometheus cAdvisor metrics to calculate the true dollar cost of CPU, RAM, GPU, storage, and network transfer per Pod, Namespace, Deployment, and Label.\n3. Unit Economics & Showback / Chargeback:\n   - Shift from total infrastructure cost to business metrics: Cost per checkout, Cost per active tenant, Cost per CI/CD build.\n   - Showback: Dashboards showing engineering teams their spend to drive accountability without financial penalty.",
+    "keyConcepts": [
+      {
+        "title": "FOCUS Specification Normalization",
+        "explanation": "A vendor-neutral billing schema allowing organizations to write universal SQL queries across AWS, Azure, and GCP cost exports."
+      },
+      {
+        "title": "Container Cost Attribution",
+        "explanation": "OpenCost calculates cost = max(Resource Requests, Actual Utilization) multiplied by the real-time hourly rate of the underlying cloud instance."
+      }
+    ],
+    "diagram": {
+      "title": "FinOps Allocation Hierarchy",
+      "type": "ascii",
+      "code": "[Cloud Provider Billing Export (AWS CUR / Azure Cost)]\n                   |\n                   v\n[FOCUS Specification 1.0 Standardized Dataset] (BilledCost, EffectiveCost)\n                   |\n                   +---> Unallocated Node Infrastructure ($20,000/mo)\n                   |\n                   v\n[OpenCost Engine inside Kubernetes] (Prometheus Metrics + Cloud Pricing APIs)\n                   |\n    +--------------+--------------+\n    |                             |\n    v                             v\n[Namespace: payments]         [Namespace: analytics]\n- CPU: $4,200/mo              - CPU: $11,500/mo\n- Memory: $1,800/mo           - Memory: $2,500/mo\n(Attributed to Team A)        (Attributed to Team B)"
+    },
+    "commands": [
+      { "cmd": "kubectl get pods -n opencost", "desc": "Verify OpenCost allocation daemon and Prometheus scraping pods" },
+      { "cmd": "curl http://localhost:9003/allocation/compute -d 'window=7d&aggregate=namespace' | jq .", "desc": "Query OpenCost compute costs aggregated by namespace over 7 days" },
+      { "cmd": "kubectl top nodes --sort-by=cpu", "desc": "Inspect current node CPU utilization to identify idle waste candidates" }
+    ],
+    "productionCode": {
+      "language": "sql",
+      "filename": "focus-multicloud-cost-query.sql",
+      "code": "SELECT\n    ProviderName,\n    ChargeCategory,\n    ServiceName,\n    RegionName,\n    Tags['CostCenter'] AS CostCenter,\n    SUM(EffectiveCost) AS TotalEffectiveCost,\n    SUM(BilledCost) AS TotalBilledCost,\n    (SUM(BilledCost) - SUM(EffectiveCost)) AS CommittedDiscountSavings\nFROM\n    focus_cost_and_usage_dataset\nWHERE\n    BillingPeriodStart >= TIMESTAMP '2026-03-01'\n    AND BillingPeriodEnd < TIMESTAMP '2026-04-01'\nGROUP BY\n    ProviderName,\n    ChargeCategory,\n    ServiceName,\n    RegionName,\n    Tags['CostCenter']\nORDER BY\n    TotalEffectiveCost DESC;",
+      "explanation": "Standardized SQL query against a FOCUS 1.0 schema demonstrating unified cost aggregation across AWS and Azure with tag-based cost-center attribution."
+    },
+    "gotchas": [
+      {
+        "issue": "Idle / Unallocated cluster cost is missing from team reports",
+        "resolution": "Nodes are rarely 100% utilized. OpenCost calculates 'Idle Cost'. SREs must establish a policy: either allocate idle cost proportionally to workloads or treat idle capacity as shared platform overhead.",
+        "severity": "warning"
+      }
+    ],
+    "interviewQuestions": [
+      {
+        "question": "How do you attribute a $50,000 monthly shared EKS cluster bill to 30 different development teams?",
+        "answer": "Deploy OpenCost integrated with Prometheus. OpenCost tracks pod-level CPU/memory requests and actual usage, multiplying them by the underlying EC2 Spot/On-Demand instance costs. By enforcing Kubernetes label standards, OpenCost outputs granular cost breakdowns per team and isolates idle cluster overhead for capacity right-sizing.",
+        "platformContext": "Critical FinOps question in Platform Engineer interviews assessing cost governance and resource attribution."
+      }
+    ],
+    "references": [
+      { "title": "FinOps FOCUS Specification", "url": "https://focus.finops.org/", "source": "FinOps Foundation", "type": "official" },
+      { "title": "OpenCost Documentation", "url": "https://www.opencost.io/docs/", "source": "CNCF OpenCost", "type": "spec" }
+    ],
+    "quiz": [
+      {
+        "id": "finops-1",
+        "question": "What is the primary role of the FOCUS specification in cloud engineering?",
+        "options": [
+          "To provide a standard schema for multi-cloud billing and usage data across AWS, Azure, and GCP",
+          "To automatically shut down idle EC2 instances at night",
+          "To replace Kubernetes Horizontal Pod Autoscaler",
+          "To benchmark container image build times"
+        ],
+        "answerIndex": 0,
+        "explanation": "FOCUS standardizes column definitions and cost terminology across cloud providers, eliminating custom mapping pipelines for multi-cloud spend."
+      }
+    ]
+  },
+  {
+    "id": "cloud-karpenter-autoscaling",
+    "slug": "karpenter-v1-autoscaling-spot-consolidation",
+    "pillarId": "cloud",
+    "branch": "right",
+    "order": 10,
+    "title": "Next-Gen Autoscaling: Karpenter v1.0 GA & Spot Handling",
+    "subtitle": "NodePools, EC2NodeClass, disruption budgets, consolidation & automated spot drains",
+    "level": "Advanced",
+    "estimatedMinutes": 35,
+    "tags": ["Karpenter", "EKS", "Kubernetes", "Autoscaling", "Spot Instances", "FinOps", "AWS"],
+    "summary": "Master Karpenter v1.0 GA: Replace legacy ASG-based Cluster Autoscalers with rapid JIT node provisioning, aggressive underutilization consolidation, and graceful spot interruption draining.",
+    "overview": "The traditional Kubernetes Cluster Autoscaler (CA) scales by adjusting the desired capacity of pre-configured cloud Auto Scaling Groups (ASGs). This model is slow (3-7 minutes to scale), rigid (requires managing dozens of homogeneous ASGs for different instance sizes/zones), and leads to severe bin-packing inefficiencies.\n\nKarpenter v1.0 is the production-stable, API-solidified autoscaler built for modern cloud workloads:\n1. Core Architecture (NodePool & EC2NodeClass):\n   - NodePool: Defines workload scheduling constraints (instance categories, architectures amd64/arm64, zones, disruption budgets, taints).\n   - EC2NodeClass: Defines AWS-specific cloud infrastructure (subnet selectors, security group selectors, AMIs, IAM instance roles, and kubelet configuration).\n2. Just-In-Time (JIT) Node Provisioning:\n   - When a pod is marked unschedulable by kube-scheduler, Karpenter observes pod requirements, queries cloud EC2 capacity APIs, bin-packs an optimal instance, and brings it ready in under 45 seconds.\n3. Disruption & Consolidation:\n   - consolidationPolicy: WhenEmptyOrUnderutilized: Continuously analyzes the cluster. If two underutilized nodes can be combined onto one cheaper instance, Karpenter cordons, drains, and terminates the old nodes automatically.\n   - Disruption Budgets: Set budgets to prevent massive simultaneous node terminations during production peaks.\n4. Spot Interruption Queue:\n   - Consumes AWS 2-minute Spot Rebalance Recommendations, Spot Interruption Notices, and EC2 health events via an Amazon SQS queue.\n   - Triggers proactive cordoning and replacement node launch before AWS forcibly reclaims the instance.",
+    "keyConcepts": [
+      {
+        "title": "NodePool vs EC2NodeClass Separation",
+        "explanation": "NodePool controls workload scheduling policies and consolidation; EC2NodeClass handles cloud-provider infrastructure specifics (subnets, security groups, AMIs)."
+      },
+      {
+        "title": "Proactive Spot Interruption Handling",
+        "explanation": "Listens to SQS events for AWS 2-minute spot warnings, spinning up replacement compute before the running node is terminated."
+      }
+    ],
+    "diagram": {
+      "title": "Karpenter Autoscaling & Spot Event Loop",
+      "type": "ascii",
+      "code": "[Pending Pods (Pending)] ---> [Karpenter Controller]\n                                    |\n            +-----------------------+-----------------------+\n            | (Evaluates NodePool)                          | (Consolidation Loop)\n            v                                               v\n[Direct EC2 Fleet API Call]                     [Identifies Underutilized Nodes]\n(Launches optimal Spot/On-Demand in <45s)       (Gracefully Drains & Consolidates)\n            ^\n            | (Proactive Rebalance)\n[AWS EventBridge] ---> [SQS Interruption Queue] ---> [Karpenter Drains Node Before Interruption]"
+    },
+    "commands": [
+      { "cmd": "kubectl get nodepools,ec2nodeclasses -A", "desc": "List all active Karpenter v1.0 NodePools and AWS node templates" },
+      { "cmd": "kubectl get nodeclaims -o wide", "desc": "Inspect active Karpenter NodeClaims, instance types, zones, and capacity types" },
+      { "cmd": "kubectl logs -l app.kubernetes.io/name=karpenter -n kube-system -f", "desc": "Stream Karpenter controller scheduling decisions, consolidation events, and node drains" }
+    ],
+    "productionCode": {
+      "language": "yaml",
+      "filename": "karpenter-v1-nodepool.yaml",
+      "code": "apiVersion: karpenter.sh/v1\nkind: NodePool\nmetadata:\n  name: general-compute\nspec:\n  template:\n    spec:\n      nodeClassRef:\n        group: karpenter.k8s.aws\n        kind: EC2NodeClass\n        name: default-ec2\n      requirements:\n      - key: karpenter.sh/capacity-type\n        operator: In\n        values: [\"spot\", \"on-demand\"]\n      - key: kubernetes.io/arch\n        operator: In\n        values: [\"arm64\", \"amd64\"]\n      - key: karpenter.k8s.aws/instance-category\n        operator: In\n        values: [\"c\", \"m\", \"r\"]\n      - key: karpenter.k8s.aws/instance-generation\n        operator: Gt\n        values: [\"5\"]\n  disruption:\n    consolidationPolicy: WhenEmptyOrUnderutilized\n    consolidateAfter: 1m\n    budgets:\n    - reasons: [\"Underutilized\", \"Empty\"]\n      nodes: \"15%\"\n  limits:\n    cpu: 500\n    memory: 2000Gi\n---\napiVersion: karpenter.k8s.aws/v1\nkind: EC2NodeClass\nmetadata:\n  name: default-ec2\nspec:\n  amiFamily: AL2023\n  role: KarpenterNodeRole-prod-cluster\n  subnetSelectorTerms:\n  - tags:\n      karpenter.sh/discovery: \"prod-cluster\"\n  securityGroupSelectorTerms:\n  - tags:\n      karpenter.sh/discovery: \"prod-cluster\"\n  instanceStorePolicy: RAID0",
+      "explanation": "Production Karpenter v1.0 NodePool and EC2NodeClass defining diversified instance architectures, automated consolidation, disruption budget limits, and SQS-integrated spot management."
+    },
+    "gotchas": [
+      {
+        "issue": "Consolidation thrashing (nodes repeatedly spinning up and down)",
+        "resolution": "Set 'consolidateAfter: 1m' or longer to prevent premature consolidation during transient traffic dips, and always define disruption budgets.",
+        "severity": "warning"
+      }
+    ],
+    "interviewQuestions": [
+      {
+        "question": "How does Karpenter v1.0 protect production workloads from sudden EC2 Spot interruptions?",
+        "answer": "Karpenter connects to an Amazon SQS queue that receives EC2 Spot Interruption Warnings and Rebalance Recommendations from EventBridge. Upon receiving the 2-minute notice, Karpenter immediately provisions a replacement node and cordons/drains the target node gracefully, ensuring pods transfer without dropping live traffic before AWS reclaims the instance.",
+        "platformContext": "Crucial Senior Cloud/SRE interview scenario evaluating spot resilience and modern Kubernetes autoscaling."
+      }
+    ],
+    "references": [
+      { "title": "Karpenter v1.0 Documentation", "url": "https://karpenter.sh/docs/", "source": "Karpenter / AWS", "type": "official" }
+    ],
+    "quiz": [
+      {
+        "id": "karp-1",
+        "question": "What is the primary architectural difference between Karpenter v1.0 and the legacy Cluster Autoscaler?",
+        "options": [
+          "Karpenter bypasses Auto Scaling Groups to provision right-sized nodes directly via EC2 Fleet APIs in seconds",
+          "Karpenter only supports Fargate serverless containers",
+          "Karpenter requires Docker Desktop installed on worker nodes",
+          "Karpenter cannot run on AWS"
+        ],
+        "answerIndex": 0,
+        "explanation": "Cluster Autoscaler manipulates pre-configured ASG desired counts, whereas Karpenter evaluates unschedulable pods directly and provisions tailored instances on demand."
+      }
+    ]
   }
 ];

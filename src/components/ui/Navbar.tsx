@@ -18,6 +18,7 @@ import {
   Menu,
   X,
   ShieldCheck,
+  Box,
 } from 'lucide-react';
 import { getStoredProgress } from '@/lib/storage';
 import { ALL_TOPICS } from '@/data';
@@ -51,6 +52,7 @@ export function Navbar({ onOpenSearch }: NavbarProps) {
   const navLinks = [
     { href: '/', label: 'Mindmap', icon: Compass },
     { href: '/topics', label: 'Curriculum', icon: BookOpen },
+    { href: '/labs', label: 'Hands-On Labs', icon: Box },
     { href: '/tools', label: 'DevOps Tools', icon: Wrench },
     { href: '/flashcards', label: 'Flashcards', icon: Sparkles },
     { href: '/interview-prep', label: 'Mock Interview', icon: Server },

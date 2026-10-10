@@ -815,5 +815,72 @@ export const CICD_TOPICS: TopicItem[] = [
         "explanation": "Unit tests form the broad foundation (typically ~70%) because they are fast, isolated, and cheap to run."
       }
     ]
+  },
+  {
+    "id": "cicd-slsa-sigstore-supplychain",
+    "slug": "slsa-level-3-keyless-signing-sigstore-rekor",
+    "pillarId": "cicd",
+    "branch": "right",
+    "order": 10,
+    "title": "SLSA Level 3 & Keyless Supply Chain Security (Sigstore & Rekor)",
+    "subtitle": "OIDC workflow identity, Fulcio ephemeral certificates, Rekor transparency log & Kyverno admission gates",
+    "level": "Advanced",
+    "estimatedMinutes": 35,
+    "tags": ["SLSA", "Sigstore", "Cosign", "Rekor", "Fulcio", "DevSecOps", "Supply Chain", "Kyverno"],
+    "summary": "Eliminate long-lived CI signing keys. Implement SLSA v1.0 Build Level 3 provenance, keyless Cosign signing via Sigstore Rekor, and Kubernetes admission gates.",
+    "overview": "Software supply chain attacks target build systems to inject malicious backdoors into legitimate applications. Storing long-lived private keys inside CI secrets creates a catastrophic attack vector if CI runner credentials are leaked.\n\nThe Sigstore ecosystem enables Keyless Cryptographic Signing:\n1. Ephemeral Identity via Fulcio:\n   - The CI runner requests an OIDC token proving its identity.\n   - Fulcio verifies the OIDC token and issues a short-lived (10-minute) X.509 signing certificate.\n   - Cosign signs the container image using an ephemeral keypair that is discarded immediately after signing.\n2. Rekor Public Transparency Log:\n   - The signature, certificate, and artifact digest are published to Rekor, a tamper-proof, append-only Merkle-tree transparency log.\n   - Anyone can audit who built an artifact, when, and from what commit without needing a permanent public key.\n3. SLSA v1.0 Build Level 3 Provenance:\n   - Generates non-falsifiable in-toto attestations guaranteeing that the artifact was built on a trusted, isolated execution environment.\n4. Kubernetes Admission Control:\n   - Deploy Kyverno or OPA Gatekeeper with a cluster policy: Reject any container image that lacks a valid Rekor-logged signature matching the trusted GitHub repository OIDC identity.",
+    "keyConcepts": [
+      {
+        "title": "Keyless Signing with OIDC & Fulcio",
+        "explanation": "Replaces vulnerable long-lived private keys with ephemeral 10-minute certificates tied to cryptographically verified CI/CD workflow identities."
+      },
+      {
+        "title": "Rekor Append-Only Transparency Log",
+        "explanation": "A public, tamper-evident log providing cryptographic proof of signature issuance that cannot be altered or retroactively faked."
+      }
+    ],
+    "diagram": {
+      "title": "Keyless Sigstore Workflow",
+      "type": "ascii",
+      "code": "[GitHub Actions Workflow]\n       |\n       +---> 1. Build Container & Generate SBOM (Syft)\n       |\n       +---> 2. Fetch Ephemeral OIDC Identity Token (Actions IDP)\n       |\n       +---> 3. Exchange OIDC Token for 10-minute X.509 Cert [Sigstore Fulcio CA]\n       |\n       +---> 4. Sign Image & Upload Attestation [Cosign]\n       |\n       +---> 5. Record Cryptographic Proof in Merkle Tree [Sigstore Rekor Log]\n       |\n       v\n[Production EKS Cluster]\n       |\n       v\n[Kyverno Admission Controller] ---> (Queries Rekor: Validates GitHub Org Identity)\n       |\n  [Image Verified & Admitted] OR [Unsigned Image Blocked]"
+    },
+    "commands": [
+      { "cmd": "cosign sign --yes ghcr.io/org/app@sha256:abc...", "desc": "Keylessly sign container image using GitHub Actions OIDC identity" },
+      { "cmd": "cosign verify --certificate-identity-regexp '^https://github.com/org/' --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' ghcr.io/org/app:v1", "desc": "Verify keyless image signature against Rekor transparency log" },
+      { "cmd": "rekor-cli get --uuid <entry-uuid> --format json", "desc": "Inspect raw transparency log entry in Sigstore Rekor" }
+    ],
+    "productionCode": {
+      "language": "yaml",
+      "filename": "kyverno-verify-sigstore-policy.yaml",
+      "code": "apiVersion: kyverno.io/v1\nkind: ClusterPolicy\nmetadata:\n  name: enforce-keyless-sigstore-provenance\n  annotations:\n    policies.kyverno.io/title: Verify Keyless Image Signatures\n    policies.kyverno.io/severity: high\nspec:\n  validationFailureAction: Enforce\n  webhookTimeoutSeconds: 30\n  rules:\n  - name: verify-sigstore-rekor\n    match:\n      any:\n      - resources:\n          kinds:\n          - Pod\n          namespaces:\n          - production\n    verifyImages:\n    - imageReferences:\n      - \"ghcr.io/company/*\"\n      attestors:\n      - entries:\n        - keyless:\n            issuer: \"https://token.actions.githubusercontent.com\"\n            subjectRegExp: \"^https://github.com/company/core-services/.*$\"\n            rekor:\n              url: \"https://rekor.sigstore.dev\"",
+      "explanation": "Kyverno ClusterPolicy requiring all images in the production namespace to be signed keylessly via GitHub Actions OIDC and logged in Sigstore Rekor before admission."
+    },
+    "gotchas": [
+      {
+        "issue": "Signing fails in GitHub Actions with 'no OIDC token found'",
+        "resolution": "Ensure your workflow declares 'permissions: id-token: write' and 'contents: read' at the job or workflow level.",
+        "severity": "critical"
+      }
+    ],
+    "interviewQuestions": [
+      {
+        "question": "How does keyless signing solve the secret rotation and leakage problem in enterprise CI/CD pipelines?",
+        "answer": "Traditional signing requires storing private keys in CI secrets, which can be exfiltrated. Keyless signing uses short-lived ephemeral certificates from Fulcio bound to an OIDC token issued by the CI provider. The private key exists for seconds only in memory and is discarded, while Rekor records an immutable audit trail.",
+        "platformContext": "Premier DevSecOps and supply chain hardening interview topic."
+      }
+    ],
+    "references": [
+      { "title": "Sigstore Documentation", "url": "https://docs.sigstore.dev/", "source": "OpenSSF / Sigstore", "type": "official" },
+      { "title": "SLSA Security Framework", "url": "https://slsa.dev/", "source": "OpenSSF", "type": "official" }
+    ],
+    "quiz": [
+      {
+        "id": "slsa-1",
+        "question": "What entity in the Sigstore architecture acts as the public, immutable transparency log for keyless signatures?",
+        "options": ["Rekor", "Fulcio", "Cosign", "Kyverno"],
+        "answerIndex": 0,
+        "explanation": "Rekor provides an append-only transparency log of cryptographic signatures that can be verified by admission controllers."
+      }
+    ]
   }
 ];

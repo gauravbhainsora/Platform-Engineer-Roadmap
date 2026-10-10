@@ -59,7 +59,7 @@ export const PILLARS: PillarMeta[] = [
     borderHex: '#34d399',
     textHex: '#a7f3d0',
     accentHex: '#059669',
-    totalTopics: 8,
+    totalTopics: 10,
   },
   {
     id: 'cloud',
@@ -74,7 +74,7 @@ export const PILLARS: PillarMeta[] = [
     borderHex: '#4ade80',
     textHex: '#bbf7d0',
     accentHex: '#16a34a',
-    totalTopics: 8,
+    totalTopics: 10,
   },
   {
     id: 'cicd',
@@ -89,7 +89,7 @@ export const PILLARS: PillarMeta[] = [
     borderHex: '#2dd4bf',
     textHex: '#99f6e4',
     accentHex: '#0d9488',
-    totalTopics: 9,
+    totalTopics: 10,
   },
   {
     id: 'iac',
@@ -119,6 +119,6 @@ export const PILLARS: PillarMeta[] = [
     borderHex: '#fb7185',
     textHex: '#fecdd3',
     accentHex: '#e11d48',
-    totalTopics: 7,
+    totalTopics: 8,
   },
 ];

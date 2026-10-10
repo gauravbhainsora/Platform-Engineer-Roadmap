@@ -10,6 +10,7 @@ import {
   ArrowRight,
   ShieldCheck,
   CheckCircle2,
+  Box,
 } from 'lucide-react';
 import { RoadmapCanvas } from '@/components/roadmap/RoadmapCanvas';
 import { ALL_TOPICS, PILLARS } from '@/data';
@@ -70,6 +71,13 @@ export default function HomePage() {
               Explore Visual Mindmap
             </a>
             <Link
+              href="/labs"
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-400 to-indigo-500 px-5 py-3 text-xs sm:text-sm font-bold text-slate-950 hover:opacity-95 shadow-lg shadow-sky-500/25 transition-all"
+            >
+              <Box className="h-4 w-4" />
+              Hands-On Labs
+            </Link>
+            <Link
               href="/tools"
               className="flex items-center gap-2 rounded-xl border border-sky-500/30 bg-sky-500/10 px-5 py-3 text-xs sm:text-sm font-bold text-sky-300 hover:bg-sky-500/20 transition-all"
             >
@@ -86,7 +94,19 @@ export default function HomePage() {
           </div>
 
           {/* Feature Quick Launch Cards */}
-          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-left">
+          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-left">
+            <Link
+              href="/labs"
+              className="group p-3.5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800/80 hover:border-sky-500/40 transition-all"
+            >
+              <div className="flex items-center justify-between text-xs mb-1">
+                <span className="font-bold text-sky-400">Hands-On Labs</span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-300">New</span>
+              </div>
+              <p className="text-xs text-slate-300 group-hover:text-white transition">
+                Interactive K8s, Dockerfile & Terraform outage challenges with live linting.
+              </p>
+            </Link>
             <Link
               href="/tools"
               className="group p-3.5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800/80 hover:border-cyan-500/40 transition-all"

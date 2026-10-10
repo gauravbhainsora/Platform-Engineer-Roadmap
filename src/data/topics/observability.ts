@@ -626,5 +626,76 @@ export const OBSERVABILITY_TOPICS: TopicItem[] = [
         "explanation": "30 days * 24 hours * 60 minutes = 43,200 minutes. 0.1% of 43,200 minutes is ~43.2 minutes."
       }
     ]
+  },
+  {
+    "id": "obs-otel-collector-transformations",
+    "slug": "opentelemetry-collector-ottl-transformations",
+    "pillarId": "observability",
+    "branch": "right",
+    "order": 8,
+    "title": "OpenTelemetry Collector Architecture & OTTL Transformations",
+    "subtitle": "High-performance telemetry gateways, transform processors, OTTL syntax & PII redaction",
+    "level": "Advanced",
+    "estimatedMinutes": 35,
+    "tags": ["OpenTelemetry", "OTel Collector", "OTTL", "Pipelines", "Observability", "FinOps", "SRE"],
+    "summary": "Build vendor-neutral telemetry pipelines. Use OpenTelemetry Transformation Language (OTTL) to sanitize PII, drop noisy data, and control cardinality in-flight.",
+    "overview": "Sending raw telemetry directly from client SDKs to observability backends creates vendor lock-in, leaks sensitive PII into third-party clouds, and drives catastrophic ingestion bills.\n\nThe OpenTelemetry Collector acts as a vendor-neutral proxy:\n1. Pipeline Architecture:\n   - Receivers: Ingest OTLP, Prometheus, Zipkin, or Fluent Bit streams.\n   - Processors: Modify, filter, batch, and transform data in memory.\n   - Exporters: Route transformed telemetry to Prometheus, Tempo, Datadog, or S3.\n2. OTTL (OpenTelemetry Transformation Language):\n   - Standardized expression language for in-flight telemetry modification.\n   - Contexts: Operates on resource, scope, span, metric, or log.\n   - Functions: set, replace_pattern, delete_key, drop, IsMatch.\n3. Real-World Use Cases:\n   - Redacting PII: Masking credit cards, authorization bearer tokens, and emails using regex.\n   - Cardinality Control: Stripping random UUIDs or customer IDs from metric labels to prevent TSDB crashes.\n   - Cost Reduction: Dropping 200 OK health-check spans while retaining 100% of 5xx error traces.",
+    "keyConcepts": [
+      {
+        "title": "Collector Pipeline Composition",
+        "explanation": "Telemetry flows deterministically through Receivers -> Processors -> Exporters. Processors execute sequentially."
+      },
+      {
+        "title": "OTTL (OpenTelemetry Transformation Language)",
+        "explanation": "Declarative condition-based language designed to mutate attributes, drop fields, or reshape telemetry structures with zero application redeploys."
+      }
+    ],
+    "diagram": {
+      "title": "OpenTelemetry Collector Gateway Topology",
+      "type": "ascii",
+      "code": "[App Pod 1] --(OTLP gRPC)---+\n                            |\n[App Pod 2] --(OTLP HTTP)---+---> [OTel Collector Gateway (Deployment)]\n                                  |-- Receiver: otlp\n                                  |-- Processor: memory_limiter\n                                  |-- Processor: transform (OTTL Redaction & Filter)\n                                  |-- Processor: batch\n                                  +--> Exporter: prometheus (Metrics)\n                                  +--> Exporter: otlp/tempo (Traces)\n                                  +--> Exporter: loki / s3 (Sanitized Logs)"
+    },
+    "commands": [
+      { "cmd": "otelcorecol validate --config=collector.yaml", "desc": "Validate OpenTelemetry collector configuration syntax and pipeline topology" },
+      { "cmd": "curl -s http://localhost:8888/metrics | grep otelcol_processor", "desc": "Inspect collector processor throughput, dropped spans, and memory pressure" },
+      { "cmd": "curl -s http://localhost:13133/healthz", "desc": "Check OpenTelemetry Collector health check endpoint" }
+    ],
+    "productionCode": {
+      "language": "yaml",
+      "filename": "otel-collector-transform.yaml",
+      "code": "processors:\n  memory_limiter:\n    check_interval: 1s\n    limit_percentage: 75\n    spike_limit_percentage: 20\n\n  transform:\n    error_mode: ignore\n    trace_statements:\n      - context: span\n        statements:\n          - replace_pattern(attributes[\"http.request.header.authorization\"], \"Bearer .*\", \"Bearer [REDACTED]\")\n          - delete_key(attributes, \"debug.verbose_payload\")\n          - set(attributes[\"sla.breached\"], \"true\") where duration > 2000000000\n    \n    log_statements:\n      - context: log\n        statements:\n          - replace_pattern(body, \"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\\\.[a-zA-Z]{2,}\", \"[EMAIL_REDACTED]\")\n\n  filter/drop_noisy_spans:\n    error_mode: ignore\n    traces:\n      span:\n        - 'attributes[\"http.target\"] == \"/healthz\" and status.code == 0'\n\nservice:\n  pipelines:\n    traces:\n      receivers: [otlp]\n      processors: [memory_limiter, filter/drop_noisy_spans, transform, batch]\n      exporters: [otlp/tempo]",
+      "explanation": "Production OpenTelemetry Collector pipeline demonstrating memory limiting, OTTL-driven PII redaction, SLA breaching tagging, and automated dropping of noisy health checks."
+    },
+    "gotchas": [
+      {
+        "issue": "Collector OOM crashes under telemetry burst traffic",
+        "resolution": "Always place the 'memory_limiter' processor as the first processor in your pipeline, and set GOMEMLIMIT environment variable to 80% of container memory limit.",
+        "severity": "critical"
+      }
+    ],
+    "interviewQuestions": [
+      {
+        "question": "How do you control observability ingestion costs and prevent PII leakage across 500 microservices?",
+        "answer": "Deploy an OpenTelemetry Collector gateway with the Transform processor and OTTL. OTTL statements can sanitize PII (passwords, emails, JWTs) using regex before telemetry leaves your VPC, while filter processors drop 100% of successful /healthz polling spans, saving 30-50% on vendor ingestion bills without touching application source code.",
+        "platformContext": "Staff SRE interview scenario addressing compliance (GDPR/HIPAA) and FinOps telemetry cost control."
+      }
+    ],
+    "references": [
+      { "title": "OpenTelemetry Transform Processor & OTTL", "url": "https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/transformprocessor", "source": "CNCF OpenTelemetry", "type": "official" }
+    ],
+    "quiz": [
+      {
+        "id": "ottl-1",
+        "question": "In what order should processors be configured in an OpenTelemetry Collector pipeline?",
+        "options": [
+          "batch, exporters, transform, memory_limiter",
+          "memory_limiter, filter, transform, batch",
+          "transform, batch, memory_limiter, filter",
+          "exporters, batch, transform, memory_limiter"
+        ],
+        "answerIndex": 1,
+        "explanation": "memory_limiter must run first to drop or backpressure data when RAM spikes, followed by filtering and transformation, and ending with batch to group network flushes."
+      }
+    ]
   }
 ];
