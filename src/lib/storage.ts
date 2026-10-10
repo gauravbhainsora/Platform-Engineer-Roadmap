@@ -132,3 +132,5 @@ export function triggerCelebrationConfetti() {
     // Ignore in non-browser
   }
 }
+
+export const triggerConfetti = triggerCelebrationConfetti;

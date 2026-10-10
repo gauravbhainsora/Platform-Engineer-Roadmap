@@ -10,7 +10,6 @@ import {
   ChevronRight,
   Sparkles,
   Filter,
-  Eye,
   Check,
   BookOpen,
   ArrowDown,
@@ -25,6 +24,8 @@ import {
   Activity,
   X,
   Zap,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
 import { PILLARS, getTopicsByPillar } from '@/data';
 import { PillarMeta, TopicItem } from '@/types';
@@ -82,11 +83,14 @@ export function RoadmapCanvas({ onSelectTopic }: RoadmapCanvasProps) {
             <Layers className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-sm sm:text-base font-bold text-white">
+            <h2 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
               Visual Platform Engineer Mindmap
+              <span className="rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-mono">
+                Interactive Tree
+              </span>
             </h2>
             <p className="text-xs text-slate-400">
-              Interactive 8-Pillar Flow Chart • Click any node to study
+              Interactive 8-Pillar Flow Chart with organic branch connectors • Click any node to study
             </p>
           </div>
         </div>
@@ -146,8 +150,8 @@ export function RoadmapCanvas({ onSelectTopic }: RoadmapCanvasProps) {
                 className="relative w-full my-6 flex flex-col lg:flex-row items-center justify-between gap-6 scroll-mt-24"
               >
                 {/* LEFT BRANCH NODES */}
-                <div className="w-full lg:w-[42%] flex flex-col items-stretch lg:items-end gap-3.5 order-2 lg:order-1">
-                  {leftTopics.map((topic) => {
+                <div className="w-full lg:w-[41%] flex flex-col items-stretch lg:items-end gap-3 order-2 lg:order-1 relative">
+                  {leftTopics.map((topic, idx) => {
                     const isDone = !!completedMap[topic.id];
                     const isSaved = !!bookmarkedMap[topic.id];
 
@@ -158,16 +162,22 @@ export function RoadmapCanvas({ onSelectTopic }: RoadmapCanvasProps) {
                       <div
                         key={topic.id}
                         onClick={() => setSelectedTopic(topic)}
-                        className={`mindmap-node-pill group relative w-full lg:max-w-md cursor-pointer rounded-xl border p-3 text-left transition-all backdrop-blur-sm ${
+                        className={`mindmap-node-pill group relative w-full lg:max-w-md cursor-pointer rounded-2xl border p-3.5 text-left transition-all backdrop-blur-sm shadow-md ${
                           isDone
-                            ? 'border-emerald-500/30 bg-emerald-950/20 hover:border-emerald-500/60'
-                            : 'border-slate-800 bg-slate-900/80 hover:border-sky-500/50 hover:bg-slate-850'
+                            ? 'border-emerald-500/40 bg-emerald-950/20 hover:border-emerald-500/80 shadow-emerald-950/20'
+                            : 'border-slate-800 bg-slate-900/90 hover:border-sky-500/60 hover:bg-slate-850 hover:shadow-sky-950/20'
                         }`}
                         style={{
                           borderLeftWidth: '4px',
                           borderLeftColor: isDone ? '#10b981' : pillar.borderHex,
                         }}
                       >
+                        {/* Connecting branch notch indicator for desktop */}
+                        <div
+                          className="hidden lg:block absolute -right-3 top-1/2 -translate-y-1/2 w-3 h-0.5"
+                          style={{ backgroundColor: `${pillar.borderHex}60` }}
+                        />
+
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
@@ -176,7 +186,7 @@ export function RoadmapCanvas({ onSelectTopic }: RoadmapCanvasProps) {
                                   <Check className="h-2.5 w-2.5 stroke-[3]" />
                                 </span>
                               ) : (
-                                <span className="h-1.5 w-1.5 rounded-full bg-slate-500" />
+                                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: pillar.borderHex }} />
                               )}
                               <h4
                                 className={`text-xs sm:text-sm font-semibold truncate ${
@@ -224,7 +234,7 @@ export function RoadmapCanvas({ onSelectTopic }: RoadmapCanvasProps) {
                             {topic.tags.slice(0, 3).map((tag) => (
                               <span
                                 key={tag}
-                                className="rounded bg-slate-950 px-1.5 py-0.5 text-[9px] font-mono text-slate-400"
+                                className="rounded bg-slate-950 px-1.5 py-0.5 text-[9px] font-mono text-slate-400 border border-slate-800/80"
                               >
                                 {tag}
                               </span>
@@ -236,14 +246,14 @@ export function RoadmapCanvas({ onSelectTopic }: RoadmapCanvasProps) {
                   })}
                 </div>
 
-                {/* CENTRAL PILLAR SPINE NODE */}
-                <div className="w-full lg:w-[16%] flex flex-col items-center justify-center order-1 lg:order-2 shrink-0">
+                {/* CENTRAL PILLAR SPINE NODE WITH ORGANIC CONNECTOR ARCS */}
+                <div className="w-full lg:w-[18%] flex flex-col items-center justify-center order-1 lg:order-2 shrink-0 relative">
                   <div
-                    className="relative flex flex-col items-center justify-center rounded-2xl border-2 px-5 py-4 text-center shadow-xl transition-transform hover:scale-105 cursor-pointer"
+                    className="relative flex flex-col items-center justify-center rounded-2xl border-2 px-6 py-5 text-center shadow-2xl transition-transform hover:scale-105 cursor-pointer z-10"
                     style={{
                       borderColor: pillar.borderHex,
-                      backgroundColor: `${pillar.borderHex}15`,
-                      boxShadow: `0 0 25px ${pillar.borderHex}25`,
+                      backgroundColor: '#090d16',
+                      boxShadow: `0 0 35px ${pillar.borderHex}30`,
                     }}
                     onClick={() => {
                       const first = topics[0];
@@ -251,19 +261,19 @@ export function RoadmapCanvas({ onSelectTopic }: RoadmapCanvasProps) {
                     }}
                   >
                     <div
-                      className="mb-1.5 flex h-10 w-10 items-center justify-center rounded-xl text-white shadow-md"
+                      className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl text-white shadow-lg"
                       style={{ backgroundColor: pillar.bgHex }}
                     >
-                      {PILLAR_ICONS[pillar.icon] || <Layers className="h-5 w-5" />}
+                      {PILLAR_ICONS[pillar.icon] || <Layers className="h-6 w-6" />}
                     </div>
-                    <span className="text-base font-extrabold text-white tracking-wide">
+                    <span className="text-base sm:text-lg font-black text-white tracking-wide">
                       {pillar.name}
                     </span>
-                    <span className="mt-1 rounded-full px-2 py-0.5 text-[10px] font-mono font-bold text-slate-300 bg-slate-900/90 border border-slate-700">
+                    <span className="mt-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-mono font-bold text-slate-300 bg-slate-900 border border-slate-700">
                       {pillarCompletedCount}/{topics.length} Done
                     </span>
                     {isPillarMastered && (
-                      <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-slate-950 text-xs shadow-lg font-bold">
+                      <span className="absolute -top-2.5 -right-2.5 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-slate-950 text-xs shadow-lg font-black">
                         ✓
                       </span>
                     )}
@@ -271,8 +281,8 @@ export function RoadmapCanvas({ onSelectTopic }: RoadmapCanvasProps) {
                 </div>
 
                 {/* RIGHT BRANCH NODES */}
-                <div className="w-full lg:w-[42%] flex flex-col items-stretch lg:items-start gap-3.5 order-3">
-                  {rightTopics.map((topic) => {
+                <div className="w-full lg:w-[41%] flex flex-col items-stretch lg:items-start gap-3 order-3 relative">
+                  {rightTopics.map((topic, idx) => {
                     const isDone = !!completedMap[topic.id];
                     const isSaved = !!bookmarkedMap[topic.id];
 
@@ -283,16 +293,22 @@ export function RoadmapCanvas({ onSelectTopic }: RoadmapCanvasProps) {
                       <div
                         key={topic.id}
                         onClick={() => setSelectedTopic(topic)}
-                        className={`mindmap-node-pill group relative w-full lg:max-w-md cursor-pointer rounded-xl border p-3 text-left transition-all backdrop-blur-sm ${
+                        className={`mindmap-node-pill group relative w-full lg:max-w-md cursor-pointer rounded-2xl border p-3.5 text-left transition-all backdrop-blur-sm shadow-md ${
                           isDone
-                            ? 'border-emerald-500/30 bg-emerald-950/20 hover:border-emerald-500/60'
-                            : 'border-slate-800 bg-slate-900/80 hover:border-sky-500/50 hover:bg-slate-850'
+                            ? 'border-emerald-500/40 bg-emerald-950/20 hover:border-emerald-500/80 shadow-emerald-950/20'
+                            : 'border-slate-800 bg-slate-900/90 hover:border-sky-500/60 hover:bg-slate-850 hover:shadow-sky-950/20'
                         }`}
                         style={{
                           borderLeftWidth: '4px',
                           borderLeftColor: isDone ? '#10b981' : pillar.borderHex,
                         }}
                       >
+                        {/* Connecting branch notch indicator for desktop */}
+                        <div
+                          className="hidden lg:block absolute -left-3 top-1/2 -translate-y-1/2 w-3 h-0.5"
+                          style={{ backgroundColor: `${pillar.borderHex}60` }}
+                        />
+
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
@@ -301,7 +317,7 @@ export function RoadmapCanvas({ onSelectTopic }: RoadmapCanvasProps) {
                                   <Check className="h-2.5 w-2.5 stroke-[3]" />
                                 </span>
                               ) : (
-                                <span className="h-1.5 w-1.5 rounded-full bg-slate-500" />
+                                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: pillar.borderHex }} />
                               )}
                               <h4
                                 className={`text-xs sm:text-sm font-semibold truncate ${
@@ -349,7 +365,7 @@ export function RoadmapCanvas({ onSelectTopic }: RoadmapCanvasProps) {
                             {topic.tags.slice(0, 3).map((tag) => (
                               <span
                                 key={tag}
-                                className="rounded bg-slate-950 px-1.5 py-0.5 text-[9px] font-mono text-slate-400"
+                                className="rounded bg-slate-950 px-1.5 py-0.5 text-[9px] font-mono text-slate-400 border border-slate-800/80"
                               >
                                 {tag}
                               </span>
@@ -362,12 +378,12 @@ export function RoadmapCanvas({ onSelectTopic }: RoadmapCanvasProps) {
                 </div>
               </div>
 
-              {/* VERTICAL SPINE CONNECTOR ARROW */}
+              {/* VERTICAL SPINE CONNECTOR FLOW */}
               {pillarIndex < PILLARS.length - 1 && (
-                <div className="my-2 flex flex-col items-center">
-                  <div className="h-10 w-0.5 bg-gradient-to-b from-sky-400 to-indigo-500" />
-                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-800 text-sky-400 border border-slate-700">
-                    <ArrowDown className="h-3 w-3" />
+                <div className="my-3 flex flex-col items-center">
+                  <div className="h-12 w-0.5 bg-gradient-to-b from-sky-400 via-indigo-400 to-purple-500" />
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-sky-400 border border-slate-700 shadow-md">
+                    <ArrowDown className="h-3.5 w-3.5" />
                   </div>
                 </div>
               )}
@@ -376,10 +392,10 @@ export function RoadmapCanvas({ onSelectTopic }: RoadmapCanvasProps) {
         })}
       </div>
 
-      {/* QUICK PREVIEW SLIDE-OVER MODAL */}
+      {/* QUICK PREVIEW SLIDE-OVER DRAWER */}
       {selectedTopic && (
-        <div className="fixed inset-0 z-50 flex items-center justify-end bg-slate-950/70 backdrop-blur-sm animate-fade-in p-4 sm:p-6">
-          <div className="relative h-full max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl border border-slate-850 bg-slate-900 p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-end bg-slate-950/75 backdrop-blur-sm animate-fade-in p-4 sm:p-6">
+          <div className="relative h-full max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-3xl border border-slate-800 bg-slate-900 p-6 sm:p-7 shadow-2xl">
             <div className="flex items-start justify-between border-b border-slate-800 pb-4">
               <div>
                 <span className="text-xs uppercase font-mono font-semibold text-sky-400">

@@ -70,11 +70,73 @@ export default function HomePage() {
               Explore Visual Mindmap
             </a>
             <Link
+              href="/tools"
+              className="flex items-center gap-2 rounded-xl border border-sky-500/30 bg-sky-500/10 px-5 py-3 text-xs sm:text-sm font-bold text-sky-300 hover:bg-sky-500/20 transition-all"
+            >
+              <Terminal className="h-4 w-4" />
+              DevOps Tools Suite
+            </Link>
+            <Link
               href="/topics"
-              className="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-850 px-6 py-3 text-xs sm:text-sm font-bold text-white hover:bg-slate-800 transition-colors"
+              className="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-850 px-5 py-3 text-xs sm:text-sm font-bold text-white hover:bg-slate-800 transition-colors"
             >
               <BookOpen className="h-4 w-4" />
               Curriculum Track
+            </Link>
+          </div>
+
+          {/* Feature Quick Launch Cards */}
+          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-left">
+            <Link
+              href="/tools"
+              className="group p-3.5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800/80 hover:border-cyan-500/40 transition-all"
+            >
+              <div className="flex items-center justify-between text-xs mb-1">
+                <span className="font-bold text-cyan-400">DevOps Tools</span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-300">4 Tools</span>
+              </div>
+              <p className="text-xs text-slate-300 group-hover:text-white transition">
+                Web Terminal, CIDR Subnetter, JWT Decoder & K8s Hardener.
+              </p>
+            </Link>
+
+            <Link
+              href="/flashcards"
+              className="group p-3.5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800/80 hover:border-purple-500/40 transition-all"
+            >
+              <div className="flex items-center justify-between text-xs mb-1">
+                <span className="font-bold text-purple-400">3D Flashcards</span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-300">Spaced Drill</span>
+              </div>
+              <p className="text-xs text-slate-300 group-hover:text-white transition">
+                High-yield Kubernetes, Linux, and DNS concept cards with 3D flip.
+              </p>
+            </Link>
+
+            <Link
+              href="/interview-prep"
+              className="group p-3.5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800/80 hover:border-emerald-500/40 transition-all"
+            >
+              <div className="flex items-center justify-between text-xs mb-1">
+                <span className="font-bold text-emerald-400">Mock Interview</span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-300">Timed 45m</span>
+              </div>
+              <p className="text-xs text-slate-300 group-hover:text-white transition">
+                Incident triage, live scratchpad, and Staff Engineer model solutions.
+              </p>
+            </Link>
+
+            <Link
+              href="/certificate"
+              className="group p-3.5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800/80 hover:border-amber-500/40 transition-all"
+            >
+              <div className="flex items-center justify-between text-xs mb-1">
+                <span className="font-bold text-amber-400">CPE Certificate</span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300">Verifiable</span>
+              </div>
+              <p className="text-xs text-slate-300 group-hover:text-white transition">
+                Earn 8 milestone badges and print your certified credential.
+              </p>
             </Link>
           </div>
         </div>

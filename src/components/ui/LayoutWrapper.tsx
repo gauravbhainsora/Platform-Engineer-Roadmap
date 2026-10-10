@@ -16,18 +16,29 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       {/* Platform Engineering Footer */}
       <footer className="border-t border-slate-850 bg-slate-950 py-10 text-center text-xs text-slate-500 font-mono">
         <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p>© Platform Engineer Roadmap • Open Source Study Platform</p>
-          <div className="flex items-center gap-4 text-slate-400">
-            <a href="https://github.com/gauravbhainsora/Platform-Engineer-Roadmap" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-              GitHub Repository
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-slate-400">
+            <a href="/tools" className="hover:text-white transition-colors">
+              DevOps Tools
+            </a>
+            <span>•</span>
+            <a href="/flashcards" className="hover:text-white transition-colors">
+              Flashcards
+            </a>
+            <span>•</span>
+            <a href="/interview-prep" className="hover:text-white transition-colors">
+              Interview Prep
+            </a>
+            <span>•</span>
+            <a href="/certificate" className="hover:text-white transition-colors">
+              Certificate
             </a>
             <span>•</span>
             <a href="/cheatsheet" className="hover:text-white transition-colors">
-              CLI Cheat Sheet
+              CLI Cheatsheet
             </a>
             <span>•</span>
-            <a href="/quizzes" className="hover:text-white transition-colors">
-              Quizzes
+            <a href="https://github.com/gauravbhainsora/Platform-Engineer-Roadmap" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+              GitHub
             </a>
           </div>
         </div>
