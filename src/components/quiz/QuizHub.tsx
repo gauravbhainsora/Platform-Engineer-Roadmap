@@ -79,14 +79,14 @@ export function QuizHub() {
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="mb-8 text-center sm:text-left">
-        <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-mono font-semibold text-amber-400 mb-3">
-          <Award className="h-3.5 w-3.5" />
+        <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-300 mb-3">
+          <Award className="h-3.5 w-3.5 text-amber-400" />
           Technical Assessment Center
         </div>
         <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
           Platform Engineer Knowledge Checks
         </h1>
-        <p className="mt-2 text-sm sm:text-base text-slate-400">
+        <p className="mt-2 text-sm sm:text-base text-slate-300">
           Validate your mastery across Linux, Containers, Networking, Cloud, CI/CD, and SRE with instant explanations.
         </p>
       </div>
@@ -126,14 +126,14 @@ export function QuizHub() {
         <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 sm:p-8 shadow-2xl">
           <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
             <div>
-              <span className="text-xs font-mono uppercase font-bold text-sky-400">
+              <span className="text-xs font-semibold text-sky-400">
                 {currentPillar?.name} Knowledge Check
               </span>
               <h3 className="text-sm text-slate-400">
                 Question {currentQuestionIndex + 1} of {activeQuestions.length}
               </h3>
             </div>
-            <span className="text-sm font-mono font-bold text-slate-300">
+            <span className="text-sm font-semibold text-slate-300">
               Score: {correctScore}
             </span>
           </div>
@@ -190,14 +190,14 @@ export function QuizHub() {
               <button
                 onClick={handleConfirmAnswer}
                 disabled={selectedOption === null}
-                className="rounded-xl bg-gradient-to-r from-sky-400 to-indigo-500 px-6 py-2.5 text-xs sm:text-sm font-bold text-slate-950 hover:opacity-95 disabled:opacity-50 transition-all shadow-md"
+                className="rounded-xl bg-sky-500 px-6 py-2.5 text-xs sm:text-sm font-semibold text-slate-950 hover:bg-sky-400 disabled:opacity-50 transition-colors shadow-sm"
               >
                 Confirm Answer
               </button>
             ) : (
               <button
                 onClick={handleNextQuestion}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-400 to-indigo-500 px-6 py-2.5 text-xs sm:text-sm font-bold text-slate-950 hover:opacity-95 transition-all shadow-md"
+                className="flex items-center gap-2 rounded-xl bg-sky-500 px-6 py-2.5 text-xs sm:text-sm font-semibold text-slate-950 hover:bg-sky-400 transition-colors shadow-sm"
               >
                 <span>{currentQuestionIndex < activeQuestions.length - 1 ? 'Next Question' : 'View Results'}</span>
                 <ArrowRight className="h-4 w-4" />
@@ -210,25 +210,25 @@ export function QuizHub() {
       {/* Quiz Finished Summary */}
       {quizFinished && (
         <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-8 text-center shadow-2xl">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-slate-950 shadow-lg shadow-amber-500/20 mb-4">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 mb-4">
             <Award className="h-8 w-8" />
           </div>
           <h2 className="text-2xl font-bold text-white">Quiz Completed!</h2>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-slate-300">
             You scored {correctScore} out of {activeQuestions.length} on the {currentPillar?.name} assessment.
           </p>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
             <button
               onClick={() => startQuizForPillar(selectedPillarId)}
-              className="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-5 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-slate-700 transition-colors"
+              className="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white hover:bg-slate-700 transition-colors"
             >
               <RotateCcw className="h-4 w-4" />
               Retry Quiz
             </button>
             <Link
               href={`/#pillar-${selectedPillarId}`}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-400 to-indigo-500 px-5 py-2.5 text-xs sm:text-sm font-bold text-slate-950 hover:opacity-95 transition-all"
+              className="flex items-center gap-2 rounded-xl bg-sky-500 px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-950 hover:bg-sky-400 transition-colors"
             >
               <BookOpen className="h-4 w-4" />
               Study Topics on Roadmap

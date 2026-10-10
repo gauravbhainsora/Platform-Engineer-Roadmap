@@ -20,6 +20,7 @@ import {
   CICD_TOPICS,
   IAC_TOPICS,
   OBSERVABILITY_TOPICS,
+  LAB_CHALLENGES,
 } from '@/data';
 import { PillarId } from '@/types';
 
@@ -284,3 +285,70 @@ describe('Data Integrity: Cheatsheets Database', () => {
     expect(categories.size).toBeGreaterThanOrEqual(10);
   });
 });
+
+describe('Data Integrity: Hands-On Production Labs', () => {
+  it('contains at least 3 production incident challenges', () => {
+    expect(LAB_CHALLENGES.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('validates each lab challenge schema, metadata, and non-empty content', () => {
+    const ids = new Set<string>();
+
+    LAB_CHALLENGES.forEach((challenge) => {
+      expect(challenge.id).toBeTruthy();
+      expect(ids.has(challenge.id)).toBe(false);
+      ids.add(challenge.id);
+
+      expect(challenge.shortTitle.trim()).not.toBe('');
+      expect(challenge.title.trim()).not.toBe('');
+      expect(challenge.subtitle.trim()).not.toBe('');
+      expect(challenge.pillar.trim()).not.toBe('');
+      expect(challenge.incidentSummary.trim()).not.toBe('');
+      expect(challenge.starterCode.trim()).not.toBe('');
+      expect(challenge.modelSolution.trim()).not.toBe('');
+      expect(challenge.staffEngineeringNotes.trim()).not.toBe('');
+
+      expect(challenge.symptoms.length).toBeGreaterThan(0);
+      expect(challenge.rootCauses.length).toBeGreaterThan(0);
+      expect(challenge.hints.length).toBeGreaterThan(0);
+      expect(challenge.criteria.length).toBeGreaterThan(0);
+
+      // Verify severity is valid
+      expect(['P1 - Critical Outage', 'High - Security Audit', 'P2 - Infrastructure Flapping']).toContain(
+        challenge.severity
+      );
+
+      // Verify criteria schema
+      challenge.criteria.forEach((crit) => {
+        expect(crit.id).toBeTruthy();
+        expect(crit.label.trim()).not.toBe('');
+        expect(crit.hint.trim()).not.toBe('');
+        expect(typeof crit.validate).toBe('function');
+      });
+    });
+  });
+
+  it('verifies that the model solution for every lab passes 100% of its validation criteria', () => {
+    LAB_CHALLENGES.forEach((challenge) => {
+      challenge.criteria.forEach((criterion) => {
+        const result = criterion.validate(challenge.modelSolution);
+        expect(
+          result.passed,
+          `Challenge "${challenge.id}" criterion "${criterion.id}" failed on model solution: ${result.feedback}`
+        ).toBe(true);
+      });
+    });
+  });
+
+  it('verifies that the starter code fails at least one criterion (confirming incident reproduces)', () => {
+    LAB_CHALLENGES.forEach((challenge) => {
+      const evaluation = challenge.criteria.map((c) => c.validate(challenge.starterCode));
+      const hasFailure = evaluation.some((r) => !r.passed);
+      expect(
+        hasFailure,
+        `Challenge "${challenge.id}" starter code unexpectedly passed all criteria`
+      ).toBe(true);
+    });
+  });
+});
+

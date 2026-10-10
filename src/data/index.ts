@@ -23,6 +23,8 @@ export {
   CHEATSHEET_DATABASE,
 };
 
+export * from './labs';
+
 export const ALL_TOPICS: TopicItem[] = [
   ...LINUX_TOPICS,
   ...NETWORKING_TOPICS,
@@ -100,3 +102,5 @@ export function searchTopics(query: string): TopicItem[] {
     );
   });
 }
+
+export * from './labs';

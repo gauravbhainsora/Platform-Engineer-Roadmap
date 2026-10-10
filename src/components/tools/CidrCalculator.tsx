@@ -76,12 +76,12 @@ export function CidrCalculator() {
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 sm:p-8 shadow-2xl">
       <div className="flex items-center gap-3 border-b border-slate-800 pb-4 mb-6">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20">
           <Network className="h-5 w-5" />
         </div>
         <div>
           <h2 className="text-lg font-bold text-white">Visual Cloud CIDR & Subnet Calculator</h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-300">
             Compute network bounds, host capacity, and hyperscaler 5-IP reserved allocations
           </p>
         </div>
@@ -90,7 +90,7 @@ export function CidrCalculator() {
       {/* Input controls */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div>
-          <label className="block text-xs font-mono font-semibold text-slate-300 uppercase mb-2">
+          <label className="block text-xs font-medium text-slate-300 mb-2">
             Base IP Address
           </label>
           <input
@@ -98,14 +98,14 @@ export function CidrCalculator() {
             value={ipInput}
             onChange={(e) => setIpInput(e.target.value)}
             placeholder="10.0.0.0"
-            className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 font-mono text-sm text-slate-100 placeholder-slate-500 focus:border-purple-500 focus:outline-none"
+            className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 font-mono text-sm text-slate-100 placeholder-slate-500 focus:border-sky-500 focus:outline-none"
           />
           <div className="mt-2 flex gap-2">
             {['10.0.0.0', '172.16.0.0', '192.168.1.0'].map((preset) => (
               <button
                 key={preset}
                 onClick={() => setIpInput(preset)}
-                className="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-mono text-slate-400 hover:text-white"
+                className="rounded-lg bg-slate-800 px-2.5 py-1 text-xs font-mono text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
               >
                 {preset}
               </button>
@@ -115,10 +115,10 @@ export function CidrCalculator() {
 
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="text-xs font-mono font-semibold text-slate-300 uppercase">
+            <label className="text-xs font-medium text-slate-300">
               Subnet Mask Prefix (/{prefix})
             </label>
-            <span className="font-mono text-xs text-purple-400 font-bold">
+            <span className="font-mono text-xs text-sky-400 font-semibold">
               {info ? info.totalIps.toLocaleString() : 0} Total IPs
             </span>
           </div>
@@ -128,9 +128,9 @@ export function CidrCalculator() {
             max={30}
             value={prefix}
             onChange={(e) => setPrefix(Number(e.target.value))}
-            className="w-full accent-purple-500 cursor-pointer"
+            className="w-full accent-sky-500 cursor-pointer"
           />
-          <div className="flex justify-between text-[10px] font-mono text-slate-500 mt-1">
+          <div className="flex justify-between text-xs text-slate-400 mt-1">
             <span>/8 (16M IPs)</span>
             <span>/16 (VPC standard)</span>
             <span>/24 (Subnet)</span>
@@ -144,22 +144,22 @@ export function CidrCalculator() {
         <div className="space-y-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-              <span className="text-[10px] font-mono uppercase text-slate-500">Calculated CIDR</span>
-              <p className="text-base font-mono font-bold text-purple-400 mt-1">{info.cidr}</p>
+              <span className="text-xs font-medium text-slate-400">Calculated CIDR</span>
+              <p className="text-base font-mono font-bold text-sky-400 mt-1">{info.cidr}</p>
             </div>
             <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-              <span className="text-[10px] font-mono uppercase text-slate-500">Subnet Netmask</span>
+              <span className="text-xs font-medium text-slate-400">Subnet Netmask</span>
               <p className="text-base font-mono font-bold text-slate-200 mt-1">{info.netmask}</p>
             </div>
             <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-              <span className="text-[10px] font-mono uppercase text-slate-500">Total Addresses</span>
+              <span className="text-xs font-medium text-slate-400">Total Addresses</span>
               <p className="text-base font-mono font-bold text-emerald-400 mt-1">
                 {info.totalIps.toLocaleString()}
               </p>
             </div>
             <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-              <span className="text-[10px] font-mono uppercase text-slate-500">Cloud Usable IPs</span>
-              <p className="text-base font-mono font-bold text-sky-400 mt-1">
+              <span className="text-xs font-medium text-slate-400">Cloud Usable IPs</span>
+              <p className="text-base font-mono font-bold text-sky-300 mt-1">
                 {info.cloudUsable.toLocaleString()}
               </p>
             </div>
