@@ -15,6 +15,7 @@ import { K8sManifestGenerator } from '@/components/tools/K8sManifestGenerator';
 import { FlashcardDeck } from '@/components/flashcards/FlashcardDeck';
 import { RoadmapCanvas } from '@/components/roadmap/RoadmapCanvas';
 import { StudyWorkspace } from '@/components/roadmap/StudyWorkspace';
+import MockInterview from '@/components/interview/MockInterview';
 
 vi.mock('canvas-confetti', () => ({ default: vi.fn() }));
 vi.mock('next/navigation', () => ({ usePathname: () => '/' }));
@@ -55,6 +56,37 @@ async function input(element: HTMLInputElement | HTMLTextAreaElement, value: str
     element.dispatchEvent(new Event('input', { bubbles: true }));
   });
 }
+
+describe('Readable learning content', () => {
+  it('shows formatted guide explanations and copies the exact full command', async () => {
+    const topic = ALL_TOPICS.find((topic) => topic.id === 'net-ssh')!;
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('navigator', { clipboard: { writeText }, userAgent: navigator.userAgent });
+    await render(<TopicReader topic={topic} />);
+    const command = topic.commands[1].cmd;
+    const copyButton = host.querySelector<HTMLButtonElement>(`button[aria-label="Copy command: ${command}"]`)!;
+    expect(copyButton.parentElement?.querySelector('code')?.textContent).toBe(command);
+    expect([...host.querySelectorAll('code')].some((code) => code.textContent === 'ProxyJump')).toBe(true);
+    await act(() => copyButton.click());
+    expect(writeText).toHaveBeenCalledWith(command);
+  });
+
+  it('provides labeled interview checkboxes and updates coverage when toggled', async () => {
+    await render(<MockInterview />);
+    const checks = host.querySelectorAll<HTMLInputElement>('input[type="checkbox"]');
+    expect(checks.length).toBeGreaterThan(0);
+    expect(checks[0].labels?.[0].textContent?.trim()).toBeTruthy();
+    checks[0].focus();
+    expect(document.activeElement).toBe(checks[0]);
+    await act(() => checks[0].click());
+    expect(checks[0].checked).toBe(true);
+    expect(host.textContent).toContain(`1 / ${checks.length}`);
+    await act(() => checks[0].click());
+    expect(checks[0].checked).toBe(false);
+    expect(host.textContent).toContain(`0 / ${checks.length}`);
+    expect(host.querySelector<HTMLTextAreaElement>('#interview-notes')?.labels?.[0].textContent).toContain('Your Live Answer');
+  });
+});
 
 describe('Theme preference', () => {
   const toggle = () => host.querySelector<HTMLButtonElement>('button[aria-label^="Switch to "]')!;

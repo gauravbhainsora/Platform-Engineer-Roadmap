@@ -98,7 +98,7 @@ export function CheatSheetView() {
               className="group flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-line bg-surface p-4 hover:border-line hover:bg-hover transition-colors shadow-sm"
             >
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1.5">
+                <div className="flex flex-wrap items-center gap-2 mb-1.5">
                   <span className="rounded bg-sky-soft px-2 py-0.5 text-xs font-semibold uppercase text-sky-ink border border-sky-line">
                     {entry.tool}
                   </span>
@@ -111,18 +111,19 @@ export function CheatSheetView() {
                     {entry.pillarId}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 font-mono text-xs sm:text-sm font-semibold text-emerald-ink bg-inset px-3 py-2 rounded-lg border border-line overflow-x-auto">
-                  <span className="text-muted select-none">$</span>
-                  <span>{entry.cmd}</span>
+                <div className="flex items-start gap-2 font-mono text-sm leading-6 font-semibold text-emerald-ink bg-inset px-3 py-2 rounded-lg border border-line">
+                  <span aria-hidden="true" className="shrink-0 text-muted select-none">$</span>
+                  <code className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]">{entry.cmd}</code>
                 </div>
-                <p className="mt-1.5 text-xs sm:text-sm text-body leading-normal">
+                <p className="mt-2 text-sm text-body leading-relaxed">
                   {entry.desc}
                 </p>
               </div>
 
               <button
                 onClick={() => handleCopy(entry.cmd)}
-                className="self-end sm:self-center shrink-0 flex items-center gap-1.5 rounded-xl border border-line bg-subtle px-3 py-1.5 text-xs font-medium text-ink hover:text-ink hover:bg-selected transition-colors shadow-sm"
+                aria-label={`Copy command: ${entry.cmd}`}
+                className="self-end sm:self-center min-h-11 shrink-0 flex items-center gap-1.5 rounded-xl border border-line bg-subtle px-3 text-sm font-medium text-ink hover:text-ink hover:bg-selected transition-colors shadow-sm"
               >
                 {copiedCmd === entry.cmd ? (
                   <Check className="h-3.5 w-3.5 text-emerald-ink" />

@@ -6,6 +6,18 @@ Built with modern **Next.js 16 (Turbopack)**, **React 19**, **TypeScript**, and 
 
 ---
 
+## Beginner-to-expert study plan
+
+Open **Curriculum** (`/topics`) for a six-stage path containing **60 syllabus modules**, prerequisite links, core concepts, advanced details, failure cases, **60 practical labs**, and **six capstones with exit criteria**. All 73 existing technical guides are linked into the path.
+
+The stages are computing/programming foundations; Linux/network operations; containers/Kubernetes; cloud/IaC/delivery; distributed systems/reliability/security operations; and internal platforms/expert engineering judgment. The path adds Git, programming, SQL, messaging, caches, disaster recovery, operators, multi-tenancy, platform product design, governance, migrations, and explicit specialist extensions.
+
+Download [the complete offline plan](public/platform-engineering-study-plan.txt). Its single content source is `src/data/study-plan.ts`; run `pnpm study-plan:export` after editing the syllabus to regenerate the download. References were reviewed on **2026-10-10**; use documentation matching your installed versions.
+
+Progress and certificates continue to describe the 73 technical guides. Labs, capstones, and expert review are additional evidence; completing a reading checklist does not establish production expertise.
+
+---
+
 ## 🌟 Overview & Mindmap Pillars
 
 The curriculum is structured around the **8 foundational pillars** of modern Cloud-Native & Platform Engineering:
@@ -113,7 +125,7 @@ The curriculum is structured around the **8 foundational pillars** of modern Clo
 
 - **Framework**: [Next.js](https://nextjs.org/) 16 (App Router + Turbopack)
 - **UI & Components**: [React](https://react.dev/) 19 & TypeScript
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) v4 (Cyberpunk / Slate Dark Mode)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) v4 (readable neutral/pastel light mode and charcoal dark mode)
 - **Icons**: [Lucide React](https://lucide.dev/)
 - **Celebrations**: `canvas-confetti`
 

@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "study-plan:export": "node scripts/export_study_plan.mjs",
     "test": "vitest run"
   },
   "dependencies": {

@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { GuideContent, InlineGuideText } from './GuideContent';
 
 interface TopicReaderProps {
   topic: TopicItem;
@@ -197,16 +198,12 @@ export function TopicReader({ topic }: TopicReaderProps) {
       )}
 
       {/* Section 1: Conceptual Overview */}
-      <section className="my-10">
-        <h2 className="text-lg font-bold text-ink flex items-center gap-2 mb-4 border-b border-line pb-2">
-          <BookOpen className="h-5 w-5 text-sky-ink" />
+      <section id="architecture-core-concepts" className="my-10 scroll-mt-24">
+        <h2 className="text-lg font-bold text-ink flex items-start gap-3 mb-6 border-b border-line pb-3 sm:text-xl">
+          <BookOpen className="mt-0.5 h-5 w-5 shrink-0 text-sky-ink" aria-hidden="true" />
           1. Architecture & Core Concepts
         </h2>
-        <div className="prose prose-invert max-w-none text-ink leading-relaxed sm:leading-7 text-sm sm:text-base space-y-4">
-          {topic.overview.split('\n\n').map((paragraph, i) => (
-            <p key={i}>{paragraph}</p>
-          ))}
-        </div>
+        <GuideContent text={topic.overview} />
       </section>
 
       {/* Section 2: Architecture Diagram */}
@@ -243,9 +240,9 @@ export function TopicReader({ topic }: TopicReaderProps) {
               key={i}
               className="rounded-2xl border border-line bg-surface p-5 hover:border-line transition-colors"
             >
-              <h3 className="text-sm font-semibold text-ink">{concept.title}</h3>
+              <h3 className="text-base font-semibold text-ink">{concept.title}</h3>
               <p className="mt-2 text-sm sm:text-base text-body leading-relaxed font-normal">
-                {concept.explanation}
+                <InlineGuideText text={concept.explanation} />
               </p>
             </div>
           ))}
@@ -266,15 +263,16 @@ export function TopicReader({ topic }: TopicReaderProps) {
                 className="group relative flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-xl border border-line bg-inset p-3.5 hover:border-line transition-colors"
               >
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 font-mono text-xs sm:text-sm text-emerald-ink font-semibold truncate">
-                    <span>$</span>
-                    <span className="truncate">{cmd.cmd}</span>
+                  <div className="flex items-start gap-2 font-mono text-sm leading-6 text-emerald-ink font-semibold">
+                    <span aria-hidden="true" className="shrink-0 select-none">$</span>
+                    <code className="min-w-0 whitespace-pre-wrap [overflow-wrap:anywhere]">{cmd.cmd}</code>
                   </div>
-                  <p className="mt-1 text-xs text-muted">{cmd.desc}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-body"><InlineGuideText text={cmd.desc} /></p>
                 </div>
                 <button
                   onClick={() => copyToClipboard(cmd.cmd, `cmd-${i}`)}
-                  className="self-end sm:self-center shrink-0 flex items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 py-1 text-xs font-mono text-body hover:text-ink hover:border-line transition-colors"
+                  aria-label={`Copy command: ${cmd.cmd}`}
+                  className="self-end sm:self-center min-h-11 shrink-0 flex items-center gap-1.5 rounded-lg border border-line bg-surface px-3 text-sm font-mono text-body hover:text-ink hover:border-line transition-colors"
                 >
                   {copiedIndex === `cmd-${i}` ? (
                     <Check className="h-3.5 w-3.5 text-emerald-ink" />
@@ -297,8 +295,8 @@ export function TopicReader({ topic }: TopicReaderProps) {
             4. Production Configuration & Automation
           </h2>
           <div className="overflow-hidden rounded-2xl border border-line bg-inset shadow-sm">
-            <div className="flex items-center justify-between border-b border-line bg-surface px-4 py-2.5">
-              <span className="font-mono text-xs text-sky-ink font-semibold">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-surface px-4 py-2.5">
+              <span className="min-w-0 font-mono text-sm text-sky-ink font-semibold [overflow-wrap:anywhere]">
                 {topic.productionCode.filename} ({topic.productionCode.language})
               </span>
               <button
@@ -313,11 +311,11 @@ export function TopicReader({ topic }: TopicReaderProps) {
                 {copiedIndex === 'snippet' ? 'Copied' : 'Copy Code'}
               </button>
             </div>
-            <div className="overflow-x-auto p-4 font-mono text-xs text-ink">
+            <div className="overflow-x-auto p-4 font-mono text-sm leading-6 text-ink">
               <pre>{topic.productionCode.code}</pre>
             </div>
-            <div className="border-t border-line bg-surface p-3.5 text-xs text-muted">
-              💡 <span className="font-semibold text-body">Rationale:</span> {topic.productionCode.explanation}
+            <div className="border-t border-line bg-surface p-4 text-sm leading-relaxed text-body">
+              <span className="font-semibold text-ink">Rationale: </span><InlineGuideText text={topic.productionCode.explanation} />
             </div>
           </div>
         </section>
@@ -336,7 +334,7 @@ export function TopicReader({ topic }: TopicReaderProps) {
                 key={i}
                 className="rounded-xl border border-rose-line bg-rose-tint p-4 border-l-4 border-l-rose-500"
               >
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-start gap-2">
                   <span className="rounded bg-rose-soft px-2 py-0.5 text-xs font-semibold uppercase text-rose-ink">
                     {gotcha.severity}
                   </span>
@@ -344,7 +342,7 @@ export function TopicReader({ topic }: TopicReaderProps) {
                 </div>
                 <p className="mt-2 text-sm sm:text-base text-body leading-relaxed font-normal">
                   <strong className="text-emerald-ink font-semibold">Resolution: </strong>
-                  {gotcha.resolution}
+                  <InlineGuideText text={gotcha.resolution} />
                 </p>
               </div>
             ))}
@@ -365,15 +363,15 @@ export function TopicReader({ topic }: TopicReaderProps) {
                 key={i}
                 className="rounded-xl border border-line bg-surface p-5 shadow-sm"
               >
-                <h3 className="text-sm font-semibold text-ink">
-                  Q: {qna.question}
+                <h3 className="text-base font-semibold leading-relaxed text-ink">
+                  Q: <InlineGuideText text={qna.question} />
                 </h3>
                 <p className="mt-2 text-sm sm:text-base text-body leading-relaxed font-normal">
                   <strong className="text-sky-ink font-semibold">Answer: </strong>
-                  {qna.answer}
+                  <InlineGuideText text={qna.answer} />
                 </p>
-                <div className="mt-3 rounded-lg bg-inset p-2.5 text-xs text-muted border border-line">
-                  💡 <strong className="text-body">Context:</strong> {qna.platformContext}
+                <div className="mt-3 rounded-lg bg-inset p-3 text-sm leading-relaxed text-body border border-line">
+                  <strong className="text-ink">Context: </strong><InlineGuideText text={qna.platformContext} />
                 </div>
               </div>
             ))}

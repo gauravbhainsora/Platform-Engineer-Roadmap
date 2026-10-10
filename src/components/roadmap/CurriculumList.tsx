@@ -11,9 +11,9 @@ import {
   Clock
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 
-export function CurriculumList() {
+export function CurriculumList({ studyPlan }: { studyPlan?: ReactNode }) {
   const { completedTopics: completedMap } = useProgress();
   const [expandedPillars, setExpandedPillars] = useState<Record<string, boolean>>({
     linux: true,
@@ -37,12 +37,15 @@ export function CurriculumList() {
           Platform Engineering Syllabus
         </h1>
         <p className="mt-2 text-sm sm:text-base text-muted">
-          {ALL_TOPICS.length} comprehensive technical modules across Linux, Networking, Auth, Containers, Cloud, CI/CD, IaC, and Observability.
+          A staged path from computing fundamentals to expert platform design, with {ALL_TOPICS.length} technical study guides across the eight infrastructure pillars.
         </p>
       </div>
 
+      {studyPlan}
+
       {/* Pillars Accordion List */}
-      <div className="space-y-6">
+      <section id="study-guides" aria-labelledby="study-guides-title" className="scroll-mt-36 space-y-6">
+        <h2 id="study-guides-title" className="text-2xl font-bold text-ink">Technical study guides</h2>
         {PILLARS.map((pillar) => {
           const topics = getTopicsByPillar(pillar.id);
           const isExpanded = !!expandedPillars[pillar.id];
@@ -72,9 +75,9 @@ export function CurriculumList() {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h2 className="text-base sm:text-lg font-bold text-ink">
+                      <h3 className="text-base sm:text-lg font-bold text-ink">
                         {pillar.name}: {pillar.title}
-                      </h2>
+                      </h3>
                     </div>
                     <p className="text-xs text-muted mt-0.5 line-clamp-1">
                       {pillar.tagline}
@@ -161,7 +164,7 @@ export function CurriculumList() {
             </div>
           );
         })}
-      </div>
+      </section>
     </div>
   );
 }

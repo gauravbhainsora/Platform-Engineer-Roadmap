@@ -1,6 +1,7 @@
 'use client';
 
 import { Modal } from '@/components/ui/Modal';
+import { InlineGuideText } from '@/components/guide/GuideContent';
 import { toggleTopicCompletion } from '@/lib/storage';
 import { useProgress } from '@/lib/useProgress';
 import type { TopicItem } from '@/types';
@@ -26,7 +27,7 @@ export function TopicPreview({ topic, onClose }: { topic: TopicItem; onClose: ()
         <section className="my-5"><h3 className="text-sm font-semibold text-ink">Overview</h3><p className="mt-2 text-base leading-relaxed text-body">{topic.summary}</p></section>
         <section className="my-5 space-y-3">
           <h3 className="text-sm font-semibold text-ink">Key platform concepts</h3>
-          {topic.keyConcepts.map((concept) => <div key={concept.title} className="rounded-xl border border-line bg-inset p-4"><h4 className="text-sm font-bold text-sky-ink">{concept.title}</h4><p className="mt-1 text-sm leading-relaxed text-muted">{concept.explanation}</p></div>)}
+          {topic.keyConcepts.map((concept) => <div key={concept.title} className="rounded-xl border border-line bg-inset p-4"><h4 className="text-base font-semibold text-ink">{concept.title}</h4><p className="mt-2 text-sm leading-6 text-body"><InlineGuideText text={concept.explanation} /></p></div>)}
         </section>
         {topic.commands.length > 0 && <section className="my-5"><h3 className="text-sm font-semibold text-ink">Essential commands</h3><div className="mt-2 space-y-2">{topic.commands.slice(0, 3).map((command) => <pre key={command.cmd} className="overflow-x-auto rounded-lg border border-line bg-inset p-3 font-mono text-sm text-emerald-ink"><code>{command.cmd}</code></pre>)}</div></section>}
         {saveError && <p role="alert" className="text-sm text-rose-ink">{saveError}</p>}

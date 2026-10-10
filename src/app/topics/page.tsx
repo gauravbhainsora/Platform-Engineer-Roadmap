@@ -1,10 +1,11 @@
 import { CurriculumList } from '@/components/roadmap/CurriculumList';
+import { StudyPlan } from '@/components/roadmap/StudyPlan';
 
 export const metadata = {
   title: 'Curriculum Track | Platform Engineer Roadmap',
-  description: 'Complete syllabus and learning track of all 73 platform engineering topics across 8 core architectural pillars.',
+  description: 'Beginner-to-expert platform engineering study plan: foundations, Linux, networking, Kubernetes, cloud delivery, distributed systems, reliability, security, and internal platform design.',
 };
 
 export default function TopicsPage() {
-  return <CurriculumList />;
+  return <CurriculumList studyPlan={<StudyPlan />} />;
 }

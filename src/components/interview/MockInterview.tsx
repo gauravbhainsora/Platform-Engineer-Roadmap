@@ -1,9 +1,9 @@
 'use client';
 
 import { triggerConfetti } from '@/lib/storage';
+import { InlineGuideText } from '@/components/guide/GuideContent';
 import {
   Award,
-  CheckCircle2,
   Clock,
   FileText,
   HelpCircle,
@@ -342,10 +342,10 @@ export default function MockInterview() {
                 {selectedQuestion.followUpProbes.map((probe, idx) => (
                   <li
                     key={idx}
-                    className="text-xs text-body flex items-start gap-2 bg-inset p-2 rounded-lg border border-line"
+                    className="text-sm leading-6 text-body flex items-start gap-2 bg-inset p-3 rounded-lg border border-line"
                   >
                     <span className="text-amber-ink font-mono font-bold">Q{idx + 1}:</span>
-                    <span>{probe}</span>
+                    <span><InlineGuideText text={probe} /></span>
                   </li>
                 ))}
               </ul>
@@ -355,7 +355,7 @@ export default function MockInterview() {
           {/* Candidate Scratchpad */}
           <div className="p-6 rounded-2xl bg-surface border border-line space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-bold text-ink flex items-center gap-2">
+              <label htmlFor="interview-notes" className="text-sm font-bold text-ink flex items-center gap-2">
                 <FileText className="w-4 h-4 text-cyan-ink" />
                 Your Live Answer & Architecture Scratchpad
               </label>
@@ -364,6 +364,7 @@ export default function MockInterview() {
               </span>
             </div>
             <textarea
+              id="interview-notes"
               value={candidateNotes}
               onChange={(e) => setCandidateNotes(e.target.value)}
               placeholder="e.g.
@@ -437,26 +438,22 @@ export default function MockInterview() {
                   {selectedQuestion.keyTalkingPoints.map((point, idx) => {
                     const isChecked = !!checkedPoints[point];
                     return (
-                      <div
+                      <label
                         key={idx}
-                        onClick={() => handleToggleCheck(point)}
-                        className={`flex items-start gap-2.5 p-3 rounded-xl border text-xs cursor-pointer transition ${
+                        className={`flex items-start gap-3 p-3 rounded-xl border text-sm leading-relaxed cursor-pointer transition focus-within:outline-2 focus-within:outline-focus ${
                           isChecked
                             ? 'bg-emerald-tint border-emerald-line text-emerald-ink'
                             : 'bg-inset border-line text-body hover:border-line'
                         }`}
                       >
-                        <div
-                          className={`w-4 h-4 rounded mt-0.5 flex items-center justify-center border transition ${
-                            isChecked
-                              ? 'bg-emerald-fill border-emerald-line text-ink'
-                              : 'border-line bg-surface'
-                          }`}
-                        >
-                          {isChecked && <CheckCircle2 className="w-3.5 h-3.5" />}
-                        </div>
-                        <span className="leading-snug select-none">{point}</span>
-                      </div>
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => handleToggleCheck(point)}
+                          className="mt-1 h-4 w-4 shrink-0 accent-emerald-700"
+                        />
+                        <span><InlineGuideText text={point} /></span>
+                      </label>
                     );
                   })}
                 </div>
@@ -469,8 +466,8 @@ export default function MockInterview() {
                   </h4>
                   <ul className="space-y-1">
                     {selectedQuestion.antiPatterns.map((ap, i) => (
-                      <li key={i} className="text-xs text-rose-ink list-disc list-inside">
-                        {ap}
+                      <li key={i} className="text-sm leading-6 text-rose-ink list-disc list-inside">
+                        <InlineGuideText text={ap} />
                       </li>
                     ))}
                   </ul>
@@ -488,18 +485,18 @@ export default function MockInterview() {
                   </h3>
                   <span className="text-xs text-muted">Production Tested</span>
                 </div>
-                <div className="p-4 rounded-xl bg-inset border border-line text-xs text-body font-sans leading-relaxed space-y-3 max-h-[420px] overflow-y-auto pr-1">
+                <div className="p-4 rounded-xl bg-inset border border-line text-sm text-body font-sans leading-7 space-y-4">
                   {selectedQuestion.modelAnswer.split('\n\n').map((paragraph, idx) => {
                     if (paragraph.startsWith('###')) {
                       return (
-                        <h4 key={idx} className="font-bold text-cyan-ink text-sm mt-2">
+                        <h4 key={idx} className="font-semibold text-ink text-base mt-2">
                           {paragraph.replace('### ', '')}
                         </h4>
                       );
                     }
                     return (
                       <p key={idx} className="whitespace-pre-line">
-                        {paragraph}
+                        <InlineGuideText text={paragraph} />
                       </p>
                     );
                   })}
