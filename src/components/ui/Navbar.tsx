@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   Compass,
   Database,
-  Layers,
   Menu,
   Search,
   Server,
@@ -20,6 +19,7 @@ import {
   X,
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import BackupSyncModal from './BackupSyncModal';
@@ -57,10 +57,8 @@ export function Navbar({ onOpenSearch }: NavbarProps) {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-4 sm:px-6 lg:px-8">
           {/* Brand */}
           <div className="flex min-w-0 items-center gap-4 lg:gap-6">
-            <Link href="/" className="group flex items-center gap-1 sm:gap-3">
-              <div className="flex h-8 w-8 shrink-0 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-sky-fill text-ink font-bold shadow-sm transition-transform group-hover:scale-105">
-                <Layers className="h-5 w-5" />
-              </div>
+            <Link href="/" aria-label="Platform Engineer Roadmap home" className="group flex items-center gap-2 sm:gap-3">
+              <Image src="/icon.svg" width={36} height={36} alt="" aria-hidden="true" unoptimized className="h-8 w-8 shrink-0 sm:h-9 sm:w-9 shadow-sm transition-transform group-hover:scale-105" />
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-bold leading-tight tracking-tight text-ink text-xs sm:text-lg">
