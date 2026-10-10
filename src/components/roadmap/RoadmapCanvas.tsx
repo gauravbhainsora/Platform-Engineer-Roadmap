@@ -83,14 +83,11 @@ export function RoadmapCanvas({ onSelectTopic }: RoadmapCanvasProps) {
             <Layers className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-              Visual Platform Engineer Mindmap
-              <span className="rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-mono">
-                Interactive Tree
-              </span>
+            <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+              Platform Engineering Roadmap
             </h2>
-            <p className="text-xs text-slate-400">
-              Interactive 8-Pillar Flow Chart with organic branch connectors • Click any node to study
+            <p className="text-xs sm:text-sm text-slate-400">
+              Interactive 8-pillar learning guide • Click any topic node to inspect concepts and commands
             </p>
           </div>
         </div>
@@ -102,8 +99,8 @@ export function RoadmapCanvas({ onSelectTopic }: RoadmapCanvasProps) {
               onClick={() => setFilterMode('all')}
               className={`rounded-lg px-3 py-1.5 transition-colors ${
                 filterMode === 'all'
-                  ? 'bg-sky-500 text-slate-950 font-bold'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-slate-800 text-white font-semibold'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               All Topics
@@ -112,8 +109,8 @@ export function RoadmapCanvas({ onSelectTopic }: RoadmapCanvasProps) {
               onClick={() => setFilterMode('incomplete')}
               className={`rounded-lg px-3 py-1.5 transition-colors ${
                 filterMode === 'incomplete'
-                  ? 'bg-sky-500 text-slate-950 font-bold'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-slate-800 text-white font-semibold'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               To Learn
@@ -122,8 +119,8 @@ export function RoadmapCanvas({ onSelectTopic }: RoadmapCanvasProps) {
               onClick={() => setFilterMode('bookmarked')}
               className={`rounded-lg px-3 py-1.5 transition-colors ${
                 filterMode === 'bookmarked'
-                  ? 'bg-amber-400 text-slate-950 font-bold'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-amber-500/20 text-amber-300 font-semibold'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               ★ Bookmarked
@@ -246,14 +243,13 @@ export function RoadmapCanvas({ onSelectTopic }: RoadmapCanvasProps) {
                   })}
                 </div>
 
-                {/* CENTRAL PILLAR SPINE NODE WITH ORGANIC CONNECTOR ARCS */}
+                {/* CENTRAL PILLAR SPINE NODE */}
                 <div className="w-full lg:w-[18%] flex flex-col items-center justify-center order-1 lg:order-2 shrink-0 relative">
                   <div
-                    className="relative flex flex-col items-center justify-center rounded-2xl border-2 px-6 py-5 text-center shadow-2xl transition-transform hover:scale-105 cursor-pointer z-10"
+                    className="relative flex flex-col items-center justify-center rounded-2xl border-2 px-6 py-5 text-center shadow-md transition-all hover:border-slate-500 cursor-pointer z-10"
                     style={{
                       borderColor: pillar.borderHex,
-                      backgroundColor: '#090d16',
-                      boxShadow: `0 0 35px ${pillar.borderHex}30`,
+                      backgroundColor: '#0f172a',
                     }}
                     onClick={() => {
                       const first = topics[0];
@@ -261,19 +257,19 @@ export function RoadmapCanvas({ onSelectTopic }: RoadmapCanvasProps) {
                     }}
                   >
                     <div
-                      className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl text-white shadow-lg"
+                      className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl text-white shadow-md"
                       style={{ backgroundColor: pillar.bgHex }}
                     >
                       {PILLAR_ICONS[pillar.icon] || <Layers className="h-6 w-6" />}
                     </div>
-                    <span className="text-base sm:text-lg font-black text-white tracking-wide">
+                    <span className="text-base sm:text-lg font-bold text-white tracking-wide">
                       {pillar.name}
                     </span>
-                    <span className="mt-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-mono font-bold text-slate-300 bg-slate-900 border border-slate-700">
+                    <span className="mt-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium text-slate-300 bg-slate-900 border border-slate-700">
                       {pillarCompletedCount}/{topics.length} Done
                     </span>
                     {isPillarMastered && (
-                      <span className="absolute -top-2.5 -right-2.5 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-slate-950 text-xs shadow-lg font-black">
+                      <span className="absolute -top-2.5 -right-2.5 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-slate-950 text-xs shadow-md font-bold">
                         ✓
                       </span>
                     )}
@@ -474,7 +470,7 @@ export function RoadmapCanvas({ onSelectTopic }: RoadmapCanvasProps) {
 
               <Link
                 href={`/topics/${selectedTopic.slug}`}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-400 to-indigo-500 px-5 py-2.5 text-xs font-bold text-slate-950 hover:opacity-95 shadow-lg shadow-sky-500/20 transition-all"
+                className="flex items-center gap-2 rounded-xl bg-sky-500 hover:bg-sky-400 px-5 py-2.5 text-xs font-semibold text-slate-950 transition-colors shadow-sm"
               >
                 <BookOpen className="h-4 w-4" />
                 Open Full Study Guide

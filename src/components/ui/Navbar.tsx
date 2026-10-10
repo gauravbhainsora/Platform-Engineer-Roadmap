@@ -68,20 +68,20 @@ export function Navbar({ onOpenSearch }: NavbarProps) {
           {/* Brand */}
           <div className="flex items-center gap-4 lg:gap-6">
             <Link href="/" className="group flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 via-indigo-500 to-purple-600 shadow-lg shadow-sky-500/20 transition-transform group-hover:scale-105">
-                <Layers className="h-5 w-5 text-white" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-500 text-slate-950 font-bold shadow-sm transition-transform group-hover:scale-105">
+                <Layers className="h-5 w-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-bold tracking-tight text-white text-base sm:text-lg">
                     Platform Engineer
                   </span>
-                  <span className="rounded-md bg-sky-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-sky-400 border border-sky-500/20">
+                  <span className="rounded bg-slate-800 px-1.5 py-0.5 text-[10px] font-semibold text-slate-300 border border-slate-700">
                     ROADMAP
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-400 font-mono hidden xl:block">
-                  8 Pillars • 67 In-Depth Topics
+                <p className="text-xs text-slate-400 font-normal hidden xl:block">
+                  8 Pillars • {totalCount} Topics
                 </p>
               </div>
             </Link>
@@ -100,8 +100,8 @@ export function Navbar({ onOpenSearch }: NavbarProps) {
                     href={item.href}
                     className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
                       isActive
-                        ? 'bg-slate-800 text-sky-400 font-semibold'
-                        : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
+                        ? 'bg-slate-800 text-white font-semibold'
+                        : 'text-slate-300 hover:bg-slate-850 hover:text-white'
                     }`}
                   >
                     <Icon className="h-3.5 w-3.5" />

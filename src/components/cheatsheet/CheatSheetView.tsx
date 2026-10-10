@@ -102,15 +102,15 @@ export function CheatSheetView() {
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1.5">
-                  <span className="rounded bg-sky-500/10 px-2 py-0.5 text-[10px] font-mono font-bold uppercase text-sky-400 border border-sky-500/20">
+                  <span className="rounded bg-sky-500/10 px-2 py-0.5 text-xs font-semibold uppercase text-sky-400 border border-sky-500/20">
                     {entry.tool}
                   </span>
                   {entry.category && (
-                    <span className="rounded bg-slate-950 px-2 py-0.5 text-[10px] font-mono text-slate-400 border border-slate-800">
+                    <span className="rounded bg-slate-950 px-2 py-0.5 text-xs text-slate-300 border border-slate-800">
                       {entry.category}
                     </span>
                   )}
-                  <span className="text-[11px] text-slate-500 font-mono capitalize">
+                  <span className="text-xs text-slate-400 capitalize font-normal">
                     {entry.pillarId}
                   </span>
                 </div>
@@ -118,14 +118,14 @@ export function CheatSheetView() {
                   <span className="text-slate-600 select-none">$</span>
                   <span>{entry.cmd}</span>
                 </div>
-                <p className="mt-1.5 text-xs text-slate-300">
+                <p className="mt-1.5 text-xs sm:text-sm text-slate-300 leading-normal">
                   {entry.desc}
                 </p>
               </div>
 
               <button
                 onClick={() => handleCopy(entry.cmd)}
-                className="self-end sm:self-center shrink-0 flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-xs font-mono font-semibold text-slate-200 hover:text-white hover:bg-slate-700 transition-colors shadow-sm"
+                className="self-end sm:self-center shrink-0 flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-200 hover:text-white hover:bg-slate-700 transition-colors shadow-sm"
               >
                 {copiedCmd === entry.cmd ? (
                   <Check className="h-3.5 w-3.5 text-emerald-400" />

@@ -825,14 +825,14 @@ export default function HandsOnLabs() {
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800">
               <div
-                className="h-full bg-gradient-to-r from-sky-400 via-indigo-400 to-emerald-400 transition-all duration-500"
+                className="h-full bg-emerald-500 transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            <div className="mt-2 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+            <div className="mt-2 flex items-center justify-between text-xs text-slate-400">
               <span>{progressPercent}% Solved</span>
               {totalSolved === LAB_CHALLENGES.length && (
-                <span className="text-emerald-400 font-bold flex items-center gap-1">
+                <span className="text-emerald-400 font-semibold flex items-center gap-1">
                   <Award className="h-3 w-3" /> Certified!
                 </span>
               )}
@@ -851,10 +851,10 @@ export default function HandsOnLabs() {
               <button
                 key={challenge.id}
                 onClick={() => handleSelectChallenge(idx)}
-                className={`group flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all ${
+                className={`group flex items-center gap-2.5 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-colors ${
                   isActive
-                    ? 'bg-sky-500 text-slate-950 shadow-lg shadow-sky-500/20'
-                    : 'border border-slate-850 bg-slate-900/90 text-slate-300 hover:border-slate-700 hover:text-white'
+                    ? 'bg-sky-500 text-slate-950'
+                    : 'border border-slate-800 bg-slate-900/90 text-slate-300 hover:border-slate-700 hover:text-white'
                 }`}
               >
                 <Icon className={`h-4 w-4 ${isActive ? 'text-slate-950' : 'text-sky-400'}`} />
@@ -881,21 +881,21 @@ export default function HandsOnLabs() {
           {/* Incident Overview Card */}
           <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 space-y-4">
             <div className="flex items-center justify-between gap-2">
-              <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-mono font-semibold ${activeChallenge.severityColor}`}>
+              <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${activeChallenge.severityColor}`}>
                 <ShieldAlert className="h-3 w-3" />
                 {activeChallenge.severity}
               </span>
-              <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">
+              <span className="text-xs text-slate-400 uppercase tracking-wide font-normal">
                 {activeChallenge.pillar}
               </span>
             </div>
 
             <div>
               <h2 className="text-xl font-bold text-white">{activeChallenge.title}</h2>
-              <p className="mt-1 text-xs text-slate-400">{activeChallenge.subtitle}</p>
+              <p className="mt-1 text-xs sm:text-sm text-slate-400">{activeChallenge.subtitle}</p>
             </div>
 
-            <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3.5 text-xs text-slate-300 leading-relaxed font-mono">
+            <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4 text-xs sm:text-sm text-slate-200 leading-relaxed font-sans">
               <span className="text-rose-400 font-semibold block mb-1">INCIDENT ALERT:</span>
               {activeChallenge.incidentSummary}
             </div>
@@ -1132,11 +1132,11 @@ export default function HandsOnLabs() {
             )}
 
             {/* Code Editor Body with Line Numbers */}
-            <div className="relative flex min-h-[460px] bg-[#090d16] font-mono text-xs leading-relaxed">
+            <div className="relative flex min-h-[460px] bg-[#0b0f19] font-mono text-xs leading-relaxed">
               {/* Line Numbers Column */}
               <div
                 aria-hidden="true"
-                className="select-none py-4 px-3 text-right text-slate-600 bg-slate-950/60 border-r border-slate-850 font-mono text-xs"
+                className="select-none py-4 px-3 text-right text-slate-600 bg-slate-950/60 border-r border-slate-800 font-mono text-xs"
                 style={{ minWidth: '3.5rem' }}
               >
                 {lineNumbers.map((num) => (
@@ -1163,7 +1163,7 @@ export default function HandsOnLabs() {
 
             {/* Bottom Actions Bar */}
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-800 bg-slate-900/90 p-4">
-              <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
+              <div className="flex items-center gap-2 text-xs text-slate-400 font-normal">
                 <Terminal className="h-4 w-4 text-sky-400" />
                 <span>Press &quot;Validate Solution&quot; to test against automated SRE linters.</span>
               </div>
@@ -1172,12 +1172,12 @@ export default function HandsOnLabs() {
                 <button
                   onClick={handleValidate}
                   disabled={isValidating}
-                  className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs sm:text-sm font-bold transition-all shadow-lg ${
+                  className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs sm:text-sm font-semibold transition-colors shadow-sm ${
                     isValidating
                       ? 'bg-slate-700 text-slate-300 cursor-not-allowed'
                       : allPassed
-                      ? 'bg-emerald-500 text-slate-950 hover:bg-emerald-400 shadow-emerald-500/20'
-                      : 'bg-gradient-to-r from-sky-400 to-indigo-500 text-slate-950 hover:opacity-95 shadow-sky-500/25'
+                      ? 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'
+                      : 'bg-sky-500 text-slate-950 hover:bg-sky-400'
                   }`}
                 >
                   {isValidating ? (
@@ -1201,7 +1201,7 @@ export default function HandsOnLabs() {
                 {allPassed && activeChallengeIndex < LAB_CHALLENGES.length - 1 && (
                   <button
                     onClick={() => handleSelectChallenge(activeChallengeIndex + 1)}
-                    className="flex items-center gap-1.5 rounded-xl border border-sky-500/40 bg-sky-500/20 px-4 py-2.5 text-xs sm:text-sm font-bold text-sky-300 hover:bg-sky-500/30 transition"
+                    className="flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-200 hover:bg-slate-700 transition-colors"
                   >
                     <span>Next Lab</span>
                     <ChevronRight className="h-4 w-4" />

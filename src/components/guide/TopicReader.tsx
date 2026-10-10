@@ -98,7 +98,7 @@ export function TopicReader({ topic }: TopicReaderProps) {
   return (
     <article className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Breadcrumb Navigation */}
-      <nav className="mb-6 flex flex-wrap items-center gap-2 text-xs font-mono text-slate-400">
+      <nav className="mb-6 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-400">
         <Link href="/" className="hover:text-sky-400 transition-colors">
           Roadmap
         </Link>
@@ -114,19 +114,19 @@ export function TopicReader({ topic }: TopicReaderProps) {
       </nav>
 
       {/* Header Banner */}
-      <div className="relative rounded-2xl border border-slate-800 bg-gradient-to-b from-slate-900 to-slate-950 p-6 sm:p-8 shadow-xl">
+      <div className="relative rounded-2xl border border-slate-800/80 bg-slate-900/60 p-6 sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span
-              className="rounded-lg px-2.5 py-1 text-xs font-mono font-bold uppercase tracking-wider text-white"
+              className="rounded-md px-2.5 py-1 text-xs font-semibold text-white"
               style={{ backgroundColor: pillar?.bgHex || '#0284c7' }}
             >
               {pillar?.name}
             </span>
-            <span className="rounded-lg bg-slate-800 px-2.5 py-1 text-xs font-mono text-slate-300">
+            <span className="rounded-md bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-300">
               {topic.level}
             </span>
-            <span className="text-xs text-slate-400 font-mono">
+            <span className="text-xs text-slate-400 font-normal">
               ⏱ {topic.estimatedMinutes} min read
             </span>
           </div>
@@ -146,7 +146,7 @@ export function TopicReader({ topic }: TopicReaderProps) {
             </button>
             <button
               onClick={handleToggleComplete}
-              className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold transition-colors ${
+              className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors ${
                 isCompleted
                   ? 'border-emerald-500/50 bg-emerald-500/20 text-emerald-300'
                   : 'border-sky-500/40 bg-sky-500/10 text-sky-400 hover:bg-sky-500/20'
@@ -165,10 +165,10 @@ export function TopicReader({ topic }: TopicReaderProps) {
           </div>
         </div>
 
-        <h1 className="mt-4 text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+        <h1 className="mt-4 text-2xl sm:text-3xl font-bold text-white tracking-tight">
           {topic.title}
         </h1>
-        <p className="mt-2 text-sm sm:text-base text-slate-300 leading-relaxed">
+        <p className="mt-2 text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
           {topic.subtitle}
         </p>
 
@@ -177,7 +177,7 @@ export function TopicReader({ topic }: TopicReaderProps) {
           {topic.tags.map((tag) => (
             <span
               key={tag}
-              className="rounded-md bg-slate-950 px-2 py-0.5 text-xs font-mono text-slate-400 border border-slate-800"
+              className="rounded-md bg-slate-950/80 px-2.5 py-0.5 text-xs text-slate-400 border border-slate-800"
             >
               #{tag}
             </span>
@@ -211,7 +211,7 @@ export function TopicReader({ topic }: TopicReaderProps) {
           <BookOpen className="h-5 w-5 text-sky-400" />
           1. Architecture & Core Concepts
         </h2>
-        <div className="prose prose-invert max-w-none text-slate-300 leading-relaxed text-sm sm:text-base space-y-4">
+        <div className="prose prose-invert max-w-none text-slate-200 leading-relaxed sm:leading-7 text-sm sm:text-base space-y-4">
           {topic.overview.split('\n\n').map((paragraph, i) => (
             <p key={i}>{paragraph}</p>
           ))}
@@ -222,7 +222,7 @@ export function TopicReader({ topic }: TopicReaderProps) {
       {topic.diagram && (
         <section className="my-10">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-bold text-slate-300 font-mono uppercase tracking-wider flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
               <Terminal className="h-4 w-4 text-sky-400" />
               Architecture Diagram: {topic.diagram.title}
             </h3>
@@ -252,8 +252,8 @@ export function TopicReader({ topic }: TopicReaderProps) {
               key={i}
               className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5 hover:border-slate-700 transition-colors"
             >
-              <h3 className="text-sm font-bold text-white text-sky-300">{concept.title}</h3>
-              <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              <h3 className="text-sm font-semibold text-white">{concept.title}</h3>
+              <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
                 {concept.explanation}
               </p>
             </div>
@@ -343,16 +343,16 @@ export function TopicReader({ topic }: TopicReaderProps) {
             {topic.gotchas.map((gotcha, i) => (
               <div
                 key={i}
-                className="rounded-2xl border border-rose-900/40 bg-rose-950/20 p-5 border-l-4 border-l-rose-500"
+                className="rounded-xl border border-rose-900/30 bg-rose-950/20 p-4 border-l-4 border-l-rose-500"
               >
                 <div className="flex items-center gap-2">
-                  <span className="rounded bg-rose-500/20 px-2 py-0.5 text-[10px] font-mono font-bold uppercase text-rose-400">
+                  <span className="rounded bg-rose-500/20 px-2 py-0.5 text-[11px] font-semibold uppercase text-rose-300">
                     {gotcha.severity}
                   </span>
-                  <h3 className="text-sm font-bold text-rose-200">{gotcha.issue}</h3>
+                  <h3 className="text-sm font-semibold text-rose-200">{gotcha.issue}</h3>
                 </div>
-                <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
-                  <strong className="text-emerald-400">Resolution: </strong>
+                <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+                  <strong className="text-emerald-400 font-semibold">Resolution: </strong>
                   {gotcha.resolution}
                 </p>
               </div>
@@ -372,17 +372,17 @@ export function TopicReader({ topic }: TopicReaderProps) {
             {topic.interviewQuestions.map((qna, i) => (
               <div
                 key={i}
-                className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 shadow-md"
+                className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 shadow-sm"
               >
-                <h3 className="text-sm font-bold text-white text-purple-300">
+                <h3 className="text-sm font-semibold text-white">
                   Q: {qna.question}
                 </h3>
-                <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
-                  <strong className="text-sky-400">Answer: </strong>
+                <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+                  <strong className="text-sky-400 font-semibold">Answer: </strong>
                   {qna.answer}
                 </p>
-                <div className="mt-3 rounded-lg bg-slate-950 p-2.5 text-xs text-slate-400 border border-slate-800 font-mono">
-                  🎯 <strong className="text-slate-300">Context:</strong> {qna.platformContext}
+                <div className="mt-3 rounded-lg bg-slate-950/80 p-2.5 text-xs text-slate-400 border border-slate-800">
+                  💡 <strong className="text-slate-300">Context:</strong> {qna.platformContext}
                 </div>
               </div>
             ))}
@@ -392,7 +392,7 @@ export function TopicReader({ topic }: TopicReaderProps) {
 
       {/* Section 8: Interactive Topic Quiz */}
       {topic.quiz.length > 0 && (
-        <section className="my-10 rounded-2xl border border-slate-800 bg-slate-900/90 p-6 shadow-xl">
+        <section className="my-10 rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-sm">
           <h2 className="text-lg font-bold text-white flex items-center gap-2 mb-2">
             <Award className="h-5 w-5 text-amber-400" />
             7. Interactive Knowledge Check
@@ -407,24 +407,24 @@ export function TopicReader({ topic }: TopicReaderProps) {
               const isCorrect = selected === q.answerIndex;
 
               return (
-                <div key={q.id} className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-                  <h4 className="text-sm font-bold text-slate-100">
+                <div key={q.id} className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                  <h4 className="text-sm font-semibold text-slate-100">
                     {qIndex + 1}. {q.question}
                   </h4>
 
                   <div className="mt-3 space-y-2">
                     {q.options.map((option, optIdx) => {
                       const isChosen = selected === optIdx;
-                      let btnStyle = 'border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700';
+                      let btnStyle = 'border-slate-800 bg-slate-900/80 text-slate-300 hover:border-slate-700';
 
                       if (quizSubmitted) {
                         if (optIdx === q.answerIndex) {
-                          btnStyle = 'border-emerald-500 bg-emerald-950/40 text-emerald-300 font-bold';
+                          btnStyle = 'border-emerald-500 bg-emerald-950/40 text-emerald-300 font-semibold';
                         } else if (isChosen && !isCorrect) {
                           btnStyle = 'border-rose-500 bg-rose-950/40 text-rose-300';
                         }
                       } else if (isChosen) {
-                        btnStyle = 'border-sky-500 bg-sky-950/40 text-sky-300 font-bold';
+                        btnStyle = 'border-sky-500 bg-sky-950/40 text-sky-300 font-semibold';
                       }
 
                       return (
@@ -456,7 +456,7 @@ export function TopicReader({ topic }: TopicReaderProps) {
               <button
                 onClick={handleSubmitQuiz}
                 disabled={Object.keys(selectedAnswers).length === 0}
-                className="w-full rounded-xl bg-gradient-to-r from-sky-400 to-indigo-500 py-3 text-xs sm:text-sm font-bold text-slate-950 hover:opacity-95 disabled:opacity-50 transition-all shadow-lg"
+                className="w-full rounded-xl bg-sky-500 hover:bg-sky-400 py-2.5 text-xs sm:text-sm font-semibold text-slate-950 disabled:opacity-50 transition-colors shadow-sm"
               >
                 Submit Answers & Check Mastery
               </button>
@@ -478,8 +478,8 @@ export function TopicReader({ topic }: TopicReaderProps) {
       {/* Section 9: References & Authoritative Sources */}
       {topic.references.length > 0 && (
         <section className="my-10">
-          <h3 className="text-sm font-bold text-slate-300 font-mono uppercase tracking-wider mb-3">
-            Authoritative References & Highest-Rated Documentation
+          <h3 className="text-sm font-semibold text-slate-300 mb-3">
+            Authoritative References & Documentation
           </h3>
           <div className="flex flex-wrap gap-2">
             {topic.references.map((ref, i) => (

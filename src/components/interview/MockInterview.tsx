@@ -286,20 +286,20 @@ export default function MockInterview() {
             <button
               key={q.id}
               onClick={() => handleReset(q)}
-              className={`text-left p-4 rounded-xl border transition-all ${
+              className={`text-left p-4 rounded-xl border transition-colors ${
                 isSelected
-                  ? 'bg-slate-800/90 border-cyan-500/50 shadow-lg shadow-cyan-500/5 ring-1 ring-cyan-500/30'
-                  : 'bg-slate-900/50 border-slate-800 hover:bg-slate-800/50 hover:border-slate-700'
+                  ? 'bg-slate-800 border-sky-500 shadow-sm'
+                  : 'bg-slate-900/60 border-slate-800 hover:bg-slate-850 hover:border-slate-700'
               }`}
             >
               <div className="flex items-center justify-between text-xs mb-2">
                 <span className="text-slate-400 font-medium">{q.category}</span>
                 <span
-                  className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                  className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
                     q.roleLevel.includes('Principal')
                       ? 'bg-purple-500/20 text-purple-300'
                       : q.roleLevel.includes('Senior')
-                      ? 'bg-cyan-500/20 text-cyan-300'
+                      ? 'bg-sky-500/20 text-sky-300'
                       : 'bg-emerald-500/20 text-emerald-300'
                   }`}
                 >
@@ -321,11 +321,11 @@ export default function MockInterview() {
           {/* Question Details Card */}
           <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-5">
             <div className="flex items-center justify-between">
-              <span className="text-xs uppercase tracking-wider font-bold text-cyan-400 flex items-center gap-1.5">
+              <span className="text-xs uppercase tracking-wider font-semibold text-sky-400 flex items-center gap-1.5">
                 <Server className="w-4 h-4" />
                 Interviewer: {selectedQuestion.interviewerPersona}
               </span>
-              <span className="text-xs text-slate-500 font-mono">
+              <span className="text-xs text-slate-400 font-normal">
                 {selectedQuestion.category}
               </span>
             </div>
@@ -392,9 +392,9 @@ export default function MockInterview() {
             <div className="flex rounded-xl bg-slate-950 p-1 border border-slate-800">
               <button
                 onClick={() => setActiveTab('scenario')}
-                className={`flex-1 py-2 rounded-lg text-xs font-semibold transition ${
+                className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${
                   activeTab === 'scenario'
-                    ? 'bg-slate-800 text-white shadow'
+                    ? 'bg-slate-800 text-white shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -402,9 +402,9 @@ export default function MockInterview() {
               </button>
               <button
                 onClick={() => setActiveTab('answer')}
-                className={`flex-1 py-2 rounded-lg text-xs font-semibold transition ${
+                className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${
                   activeTab === 'answer'
-                    ? 'bg-slate-800 text-cyan-400 shadow'
+                    ? 'bg-slate-800 text-sky-400 shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -412,9 +412,9 @@ export default function MockInterview() {
               </button>
               <button
                 onClick={() => setActiveTab('evaluation')}
-                className={`flex-1 py-2 rounded-lg text-xs font-semibold transition ${
+                className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${
                   activeTab === 'evaluation'
-                    ? 'bg-slate-800 text-emerald-400 shadow'
+                    ? 'bg-slate-800 text-emerald-400 shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -426,15 +426,15 @@ export default function MockInterview() {
             {activeTab === 'scenario' && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-white">Essential Talking Points</h3>
-                  <span className="text-xs font-mono font-bold text-cyan-400">
+                  <h3 className="text-sm font-semibold text-white">Essential Talking Points</h3>
+                  <span className="text-xs font-semibold text-sky-400">
                     {totalPointsChecked} / {selectedQuestion.keyTalkingPoints.length} ({coveragePercent}%)
                   </span>
                 </div>
 
                 <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
                   <div
-                    className="bg-cyan-500 h-full transition-all duration-300"
+                    className="bg-sky-500 h-full transition-all duration-300"
                     style={{ width: `${coveragePercent}%` }}
                   />
                 </div>

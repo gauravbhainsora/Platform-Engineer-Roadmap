@@ -205,37 +205,37 @@ export function FlashcardDeck() {
           ))}
         </div>
 
-        <div className="text-xs font-mono text-slate-400 flex items-center gap-2">
+        <div className="text-xs text-slate-400 flex items-center gap-2">
           <span>Card {currentIndex + 1} of {filteredCards.length}</span>
           <span>•</span>
-          <span className="text-emerald-400 font-bold">{knownCount} Mastered</span>
+          <span className="text-emerald-400 font-semibold">{knownCount} Mastered</span>
         </div>
       </div>
 
-      {/* 3D Flippable Card Box */}
+      {/* Clean Flippable Card Box */}
       {currentCard && (
-        <div className="relative perspective-1000 my-6">
+        <div className="relative my-6">
           <div
             onClick={() => setIsFlipped(!isFlipped)}
-            className={`relative min-h-[340px] w-full rounded-3xl border cursor-pointer p-8 sm:p-10 shadow-2xl transition-all duration-500 flex flex-col justify-between select-none ${
+            className={`relative min-h-[340px] w-full rounded-2xl border cursor-pointer p-8 sm:p-10 shadow-md transition-colors flex flex-col justify-between select-none ${
               isFlipped
-                ? 'border-indigo-500/50 bg-gradient-to-br from-slate-900 via-indigo-950/30 to-slate-950 text-slate-100 shadow-indigo-500/10'
-                : 'border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900/90 to-slate-950 text-white hover:border-slate-700 shadow-sky-500/5'
+                ? 'border-sky-500/30 bg-slate-900 text-slate-100'
+                : 'border-slate-800 bg-slate-900/90 text-white hover:border-slate-700'
             }`}
           >
             {/* Card Header */}
             <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
               <div className="flex items-center gap-2">
-                <span className="rounded-lg bg-sky-500/10 px-2.5 py-1 text-xs font-mono font-bold uppercase text-sky-400 border border-sky-500/20">
+                <span className="rounded-md bg-slate-800 px-2.5 py-1 text-xs font-semibold uppercase text-sky-400 border border-slate-700">
                   {currentCard.pillarId}
                 </span>
-                <span className="text-xs text-slate-400 font-mono">
+                <span className="text-xs text-slate-400">
                   {currentCard.category}
                 </span>
               </div>
-              <span className="text-xs font-mono text-slate-500 flex items-center gap-1">
+              <span className="text-xs text-slate-400 flex items-center gap-1.5">
                 <RotateCw className="h-3.5 w-3.5 text-slate-400" />
-                Click anywhere to flip
+                Click to flip
               </span>
             </div>
 
@@ -243,7 +243,7 @@ export function FlashcardDeck() {
             <div className="my-6">
               {!isFlipped ? (
                 <div>
-                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 block mb-2">
+                  <span className="text-xs font-semibold uppercase text-slate-400 block mb-2">
                     Question / Scenario
                   </span>
                   <h3 className="text-xl sm:text-2xl font-bold text-white leading-relaxed">
@@ -251,22 +251,22 @@ export function FlashcardDeck() {
                   </h3>
                 </div>
               ) : (
-                <div className="animate-fade-in">
-                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400 block mb-2">
+                <div className="space-y-4">
+                  <span className="text-xs font-semibold uppercase text-emerald-400 block">
                     Key Architectural Answer
                   </span>
-                  <p className="text-sm sm:text-base text-slate-200 leading-relaxed">
+                  <p className="text-base text-slate-200 leading-relaxed font-normal">
                     {currentCard.answer}
                   </p>
-                  <div className="mt-4 rounded-xl border border-sky-900/40 bg-sky-950/30 p-3 text-xs text-sky-300 font-mono">
-                    💡 <strong className="text-white">Pro Tip:</strong> {currentCard.tip}
+                  <div className="rounded-xl border border-sky-900/40 bg-sky-950/20 p-3.5 text-xs sm:text-sm text-slate-300">
+                    💡 <strong className="text-white font-semibold">Pro Tip:</strong> {currentCard.tip}
                   </div>
                 </div>
               )}
             </div>
 
             {/* Card Footer Hint */}
-            <div className="text-[11px] font-mono text-slate-500 border-t border-slate-800/80 pt-3 flex items-center justify-between">
+            <div className="text-xs text-slate-400 border-t border-slate-800/80 pt-3 flex items-center justify-between">
               <span>{isFlipped ? 'Showing Answer' : 'Showing Question'}</span>
               <span>Use arrows or buttons below to score</span>
             </div>
