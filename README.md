@@ -1,0 +1,193 @@
+# Platform Engineer Roadmap 🚀
+
+An interactive, comprehensive study platform and visual learning roadmap designed for aspiring and practicing **Platform Engineers, SREs, and Cloud Architects**.
+
+Built with modern **Next.js 16 (Turbopack)**, **React 19**, **TypeScript**, and **Tailwind CSS**.
+
+---
+
+## 🌟 Overview & Mindmap Pillars
+
+The curriculum is structured around the **8 foundational pillars** of modern Cloud-Native & Platform Engineering:
+
+```
+                          +-------------------------------------------------+
+                          |            Platform Engineer Roadmap            |
+                          +-------------------------------------------------+
+                                                   |
+         +-----------------------------------------+-----------------------------------------+
+         |                                                                                   |
+         v                                                                                   v
+  1. Linux Systems                                                            2. Computer Networking
+     • User & Group Mgmt, /etc/passwd                                            • DNS Trees, Root Servers, dig
+     • Package Managers (apt, dnf, apk)                                          • SSL/TLS, Let's Encrypt, mTLS
+     • iproute2, ss, ping, telnet                                                • TCP 3-Way Handshake vs UDP
+     • Signals (SIGTERM, SIGKILL), PID 1                                         • CIDR Subnetting & RFC 1918
+     • /var/log, journalctl, logrotate                                           • Routers, Switches, NAT Gateways
+     • Storage: fdisk, lsblk, NFS, SMB                                           • SSH, ed25519, Bastion Tunneling
+     • Bash Automation: set -euo pipefail                                        • HTTP/1.1 vs HTTP/2 vs HTTP/3
+     • Filesystem Hierarchy Standard (FHS)                                       • Common Ports & Sockets
+     • Modal Editing with Vim & Nano                                             • Netfilter, iptables, WireGuard
+     • Monitoring: top, free, df, iostat                                         • DHCP (DORA) & ARP Layer 2
+                                                                                 • NGINX & HAProxy Load Balancing
+                                                   |
+         +-----------------------------------------+-----------------------------------------+
+         |                                                                                   |
+         v                                                                                   v
+  3. Auth & Identity                                                          4. Containers & Orchestration
+     • Single Sign-On (SSO: SAML 2.0)                                            • Kernel: Namespaces & cgroups v2
+     • SaaS Providers: Okta, Entra ID, SCIM                                      • Docker & Multi-Stage Builds
+     • JSON Web Tokens: HS256 vs RS256                                           • Docker Compose & Healthchecks
+     • OAuth 2.0 Grants & PKCE Security                                          • Named Volumes vs Bind Mounts
+     • OpenID Connect (OIDC) ID Tokens                                           • Kubernetes Resources (Pod, Deploy,
+                                                                                   Service, DaemonSet, Ingress, Secret)
+                                                                                 • Registries: ECR, GHCR, Harbor
+                                                                                 • Security: Distroless, Non-root, Trivy
+                                                                                 • Service Mesh: Istio, Envoy, mTLS
+                                                   |
+         +-----------------------------------------+-----------------------------------------+
+         |                                                                                   |
+         v                                                                                   v
+  5. Cloud Engineering (Hyperscalers)                                         6. CI/CD & Delivery
+     • IaaS vs PaaS vs SaaS, Shared Model                                        • Why CI/CD? DORA Metrics
+     • Multi-AZ VPCs, Peering, Transit GW                                        • CI vs CD vs Continuous Deploy
+     • EC2, Auto Scaling Groups, ALB/NLB                                         • Build Once, Deploy Everywhere
+     • IAM Roles, Policies, IRSA Pod Auth                                        • Testing Pyramid: Unit, Integration
+     • Managed K8s: EKS, AKS, Fargate                                            • GitHub Actions & Reusable Workflows
+     • Serverless: Lambda, Event-Driven                                          • Blue-Green, Canary, Rolling Updates
+     • S3 Object Storage, Presigned URLs                                         • GitOps: ArgoCD Self-Healing Loops
+     • Cloud Databases: Aurora, DynamoDB                                         • Trunk-Based vs GitFlow Branching
+                                                                                 • Static Scans: SonarQube, SAST, SCA
+                                                   |
+         +-----------------------------------------+-----------------------------------------+
+         |                                                                                   |
+         v                                                                                   v
+  7. Infrastructure as Code (IaC)                                             8. Observability & SRE
+     • Why IaC? Eliminating Drift                                                • Telemetry Trinity: Metrics, Logs, Traces
+     • Imperative (How) vs Declarative (What)                                    • Google SRE 4 Golden Signals
+     • IaC CI/CD: Plan on PR, Apply on Merge                                     • SLI, SLO, SLA & Error Budgets
+     • IaC vs Infrastructure from Code (IfC)                                     • Open Source APM (LGTM) vs SaaS
+     • Landscape: Terraform, Pulumi, Bicep                                       • Structured JSON Logging & Vector
+     • Terraform State, S3 Locking, Modules                                      • Symptom-Based Actionable Alerting
+     • Config Mgmt (Ansible) vs Immutability                                     • OpenTelemetry (OTel) Tracing
+```
+
+---
+
+## ⚡ Key Features
+
+1. **Interactive Visual Mindmap Canvas**
+   - Directly visualizes the 8 core pillars with color-coded connector branches matching the roadmap architecture.
+   - Click any node for an instant quick preview or jump straight into the full guide.
+   - Filter by completed status, bookmarked topics, or search keywords.
+
+2. **67 In-Depth Production Study Guides**
+   - Scraped and curated from highest-rated authoritative engineering sources: *Linux Foundation, Cloudflare Learning, RFCs, Docker Docs, Kubernetes.io, AWS Architecture Center, Martin Fowler, and Google SRE*.
+   - Each guide features:
+     - Architecture & Conceptual Deep-Dive
+     - ASCII Architecture Topology Diagrams
+     - Core Mechanics Breakdown
+     - Copyable CLI Commands with explanations
+     - Real-World Production Configuration Files (Kubernetes YAML, Dockerfile, Terraform HCL, Python, Bash)
+     - Production Gotchas & Pitfalls
+     - Senior Platform Engineer Interview Questions & Answers
+     - Authoritative Documentation Links
+     - Interactive Self-Assessment Quiz with Instant Explanations
+
+3. **Searchable CLI Cheat Sheet (100+ Commands)**
+   - Filterable command reference across Linux, Docker, kubectl, Terraform, Git, AWS, and Prometheus.
+   - One-click copy with toast confirmation.
+
+4. **Interactive Knowledge Assessment Center (Quizzes)**
+   - Test your understanding per topic or per entire pillar.
+   - Immediate feedback and explanations with confetti animations on high scores.
+
+5. **Local-First Progress Tracking**
+   - Mark topics as complete or bookmarked.
+   - Progress and in-app personal notes persist automatically in `localStorage`.
+   - Global `Cmd+K` / `Ctrl+K` modal search.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js](https://nextjs.org/) 16 (App Router + Turbopack)
+- **UI & Components**: [React](https://react.dev/) 19 & TypeScript
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) v4 (Cyberpunk / Slate Dark Mode)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Celebrations**: `canvas-confetti`
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
+```bash
+git clone git@github.com:gauravbhainsora/Platform-Engineer-Roadmap.git
+cd Platform-Engineer-Roadmap
+```
+
+### 2. Install Dependencies
+```bash
+pnpm install
+```
+
+### 3. Run Development Server
+```bash
+pnpm dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### 4. Build for Production
+```bash
+pnpm build
+pnpm start
+```
+
+---
+
+## 📂 Project Structure
+
+```
+Platform-Engineer-Roadmap/
+├── scripts/
+│   ├── gen_linux.py          # Data generator for 12 Linux topics
+│   ├── gen_networking.py     # Data generator for 11 Networking topics
+│   ├── gen_auth.py           # Data generator for 5 Auth topics
+│   ├── gen_containers.py     # Data generator for 8 Container & K8s topics
+│   ├── gen_cloud.py          # Data generator for 8 Cloud topics
+│   ├── gen_cicd.py           # Data generator for 9 CI/CD topics
+│   ├── gen_iac.py            # Data generator for 7 IaC topics
+│   └── gen_observability.py  # Data generator for 7 Observability topics
+├── src/
+│   ├── app/
+│   │   ├── cheatsheet/       # CLI Cheat Sheet page
+│   │   ├── quizzes/          # Interactive assessment page
+│   │   ├── topics/           # Curriculum list & dynamic [slug] reader
+│   │   ├── globals.css       # Tailwind 4 custom dark styling
+│   │   ├── layout.tsx        # Root layout with metadata
+│   │   └── page.tsx          # Homepage with Mindmap Canvas
+│   ├── components/
+│   │   ├── cheatsheet/       # CheatSheetView component
+│   │   ├── guide/            # TopicReader in-depth study component
+│   │   ├── quiz/             # QuizHub assessment component
+│   │   ├── roadmap/          # RoadmapCanvas & CurriculumList
+│   │   └── ui/               # Navbar & SearchModal (Cmd+K)
+│   ├── data/
+│   │   ├── cheatsheets.ts    # 100+ production CLI commands
+│   │   ├── pillars.ts        # Metadata for 8 pillars
+│   │   ├── topics/           # 67 comprehensive topic data files
+│   │   └── index.ts          # Central data aggregator & lookups
+│   ├── lib/
+│   │   └── storage.ts        # LocalStorage persistence & Confetti
+│   └── types/
+│       └── index.ts          # TypeScript type definitions
+├── package.json
+└── tsconfig.json
+```
+
+---
+
+## 📜 License
+
+MIT License • Maintained by [Gaurav Bhainsora](https://github.com/gauravbhainsora)
