@@ -1,42 +1,36 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import { triggerConfetti } from '@/lib/storage';
+import { useClipboard } from '@/lib/useClipboard';
+import { useLabProgress } from '@/lib/useLabProgress';
 import {
-  Terminal,
-  CheckCircle2,
-  XCircle,
   AlertTriangle,
-  RotateCcw,
-  Play,
-  Lightbulb,
+  Award,
+  Box,
+  Check,
+  CheckCircle2,
+  ChevronRight,
+  Copy,
   Eye,
   EyeOff,
-  Copy,
-  Check,
-  Sparkles,
-  ShieldAlert,
-  Server,
-  Layers,
-  Box,
   FileCode,
-  ArrowRight,
-  ChevronRight,
-  Award,
-  Zap,
-  Wrench,
+  Lightbulb,
+  Play,
+  RotateCcw,
+  ShieldAlert,
   ShieldCheck,
-  RefreshCw,
-  Flame,
-  Cpu,
+  Sparkles,
+  Terminal,
+  Wrench,
+  XCircle
 } from 'lucide-react';
-import { triggerConfetti } from '@/lib/storage';
+import React, { useRef, useState } from 'react';
 
 import {
+  CriterionResult,
   LAB_CHALLENGES,
   LAB_PROGRESS_KEY,
-  LabChallenge,
-  CriterionResult,
-  validateLabChallenge,
+  validateLabChallenge
 } from '@/data/labs';
 
 export default function HandsOnLabs() {
@@ -53,42 +47,30 @@ export default function HandsOnLabs() {
   });
 
   // Solved challenges saved in localStorage
-  const [solvedLabs, setSolvedLabs] = useState<Record<string, boolean>>({});
+  const solvedLabs = useLabProgress();
+  const [saveError, setSaveError] = useState('');
 
   // Validation output results
   const [results, setResults] = useState<CriterionResult[]>([]);
   const [hasValidated, setHasValidated] = useState(false);
-  const [isValidating, setIsValidating] = useState(false);
 
   // UI helpers
   const [hintIndex, setHintIndex] = useState(0);
   const [showModelSolution, setShowModelSolution] = useState(false);
-  const [copiedCode, setCopiedCode] = useState(false);
+  const { copy, copiedId: copiedId, copyError } = useClipboard();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  // Load progress from localStorage on mount
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      const saved = localStorage.getItem(LAB_PROGRESS_KEY);
-      if (saved) {
-        setSolvedLabs(JSON.parse(saved));
-      }
-    } catch (e) {
-      console.error('Error loading lab progress', e);
-    }
-  }, []);
 
   // Save progress helper
   const markLabCompleted = (labId: string) => {
     const updated = { ...solvedLabs, [labId]: true };
-    setSolvedLabs(updated);
     if (typeof window !== 'undefined') {
       try {
+        setSaveError('');
         localStorage.setItem(LAB_PROGRESS_KEY, JSON.stringify(updated));
         window.dispatchEvent(new CustomEvent('platform-roadmap-labs-updated', { detail: updated }));
       } catch (e) {
         console.error('Error saving lab progress', e);
+        setSaveError('Lab progress could not be saved. Browser storage is unavailable or full.');
       }
     }
   };
@@ -102,7 +84,7 @@ export default function HandsOnLabs() {
     setHintIndex(0);
   };
 
-  const currentCode = userCodes[activeChallenge.id] || activeChallenge.starterCode;
+  const currentCode = userCodes[activeChallenge.id] ?? activeChallenge.starterCode;
 
   const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setUserCodes((prev) => ({
@@ -147,11 +129,8 @@ export default function HandsOnLabs() {
     }
   };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(currentCode);
-    setCopiedCode(true);
-    setTimeout(() => setCopiedCode(false), 2000);
-  };
+  const handleCopy = () => copy(currentCode, 'lab');
+  const copiedCode = copiedId === 'lab';
 
   const handleApplyModelSolution = () => {
     setUserCodes((prev) => ({
@@ -162,19 +141,13 @@ export default function HandsOnLabs() {
   };
 
   const handleValidate = () => {
-    setIsValidating(true);
-    setTimeout(() => {
-      const outcome = validateLabChallenge(activeChallenge.id, currentCode);
-
-      setResults(outcome.results);
-      setHasValidated(true);
-      setIsValidating(false);
-
-      if (outcome.passed) {
-        triggerConfetti();
-        markLabCompleted(activeChallenge.id);
-      }
-    }, 350);
+    const outcome = validateLabChallenge(activeChallenge.id, currentCode);
+    setResults(outcome.results);
+    setHasValidated(true);
+    if (outcome.passed) {
+      triggerConfetti();
+      markLabCompleted(activeChallenge.id);
+    }
   };
 
   const allPassed = hasValidated && results.length > 0 && results.every((r) => r.passed);
@@ -187,43 +160,45 @@ export default function HandsOnLabs() {
 
   return (
     <div className="space-y-8">
+      {saveError && <p role="alert" className="text-sm text-rose-ink">{saveError}</p>}
+      {copyError && <p role="alert" className="text-sm text-rose-ink">{copyError}</p>}
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-950 via-slate-900 to-[#0c121e] p-6 sm:p-8">
-        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-sky-500/10 blur-3xl" />
-        <div className="pointer-events-none absolute bottom-0 left-1/3 h-48 w-48 rounded-full bg-emerald-500/10 blur-3xl" />
+      <div className="relative overflow-hidden rounded-2xl border border-line bg-gradient-to-br from-inset via-surface to-inset p-6 sm:p-8">
+        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-sky-soft blur-3xl" />
+        <div className="pointer-events-none absolute bottom-0 left-1/3 h-48 w-48 rounded-full bg-emerald-soft blur-3xl" />
 
         <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-sky-500/30 bg-sky-500/10 px-3 py-1 text-xs font-mono font-semibold text-sky-400 mb-3">
-              <Sparkles className="h-3.5 w-3.5 text-sky-400" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-sky-line bg-sky-soft px-3 py-1 text-xs font-mono font-semibold text-sky-ink mb-3">
+              <Sparkles className="h-3.5 w-3.5 text-sky-ink" />
               <span>Interactive Incident Labs</span>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+            <h1 className="text-2xl sm:text-4xl font-extrabold text-ink tracking-tight">
               Production Scenario Labs
             </h1>
-            <p className="mt-2 text-sm sm:text-base text-slate-300">
-              Solve real-world platform engineering outages: debug Kubernetes CrashLoopBackOff YAML, craft multi-stage distroless Dockerfiles, and remediate Terraform resource drift.
+            <p className="mt-2 text-sm sm:text-base text-body">
+              Practice configuration checks for platform engineering outages: debug Kubernetes CrashLoopBackOff YAML, craft multi-stage distroless Dockerfiles, and remediate Terraform resource drift.
             </p>
           </div>
 
           {/* Progress Card */}
-          <div className="flex-shrink-0 rounded-xl border border-slate-800 bg-slate-900/80 p-4 sm:p-5 backdrop-blur-md min-w-[220px]">
+          <div className="flex-shrink-0 rounded-xl border border-line bg-surface p-4 sm:p-5 backdrop-blur-md min-w-[220px]">
             <div className="flex items-center justify-between text-xs mb-2">
-              <span className="font-semibold text-slate-300">Labs Completed</span>
-              <span className="font-mono font-bold text-emerald-400">
+              <span className="font-semibold text-body">Labs Completed</span>
+              <span className="font-mono font-bold text-emerald-ink">
                 {totalSolved} / {LAB_CHALLENGES.length}
               </span>
             </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800">
+            <div className="h-2 w-full overflow-hidden rounded-full bg-subtle">
               <div
-                className="h-full bg-emerald-500 transition-all duration-300"
+                className="h-full bg-emerald-fill transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            <div className="mt-2 flex items-center justify-between text-xs text-slate-400">
+            <div className="mt-2 flex items-center justify-between text-xs text-muted">
               <span>{progressPercent}% Solved</span>
               {totalSolved === LAB_CHALLENGES.length && (
-                <span className="text-emerald-400 font-semibold flex items-center gap-1">
+                <span className="text-emerald-ink font-semibold flex items-center gap-1">
                   <Award className="h-3 w-3" /> Certified!
                 </span>
               )}
@@ -232,7 +207,7 @@ export default function HandsOnLabs() {
         </div>
 
         {/* Challenge Tabs */}
-        <div className="mt-6 flex flex-wrap gap-2 border-t border-slate-800/80 pt-6">
+        <div className="mt-6 flex flex-wrap gap-2 border-t border-line pt-6">
           {LAB_CHALLENGES.map((challenge, idx) => {
             const Icon = challenge.icon || Box;
             const isSolved = solvedLabs[challenge.id];
@@ -244,18 +219,18 @@ export default function HandsOnLabs() {
                 onClick={() => handleSelectChallenge(idx)}
                 className={`group flex items-center gap-2.5 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-colors ${
                   isActive
-                    ? 'bg-sky-500 text-slate-950'
-                    : 'border border-slate-800 bg-slate-900/90 text-slate-300 hover:border-slate-700 hover:text-white'
+                    ? 'bg-sky-fill text-ink'
+                    : 'border border-line bg-surface text-body hover:border-line hover:text-ink'
                 }`}
               >
-                <Icon className={`h-4 w-4 ${isActive ? 'text-slate-950' : 'text-sky-400'}`} />
+                <Icon className={`h-4 w-4 ${isActive ? 'text-ink' : 'text-sky-ink'}`} />
                 <span>{challenge.shortTitle || challenge.title}</span>
                 {isSolved ? (
-                  <CheckCircle2 className={`h-4 w-4 ${isActive ? 'text-emerald-950' : 'text-emerald-400'}`} />
+                  <CheckCircle2 className={`h-4 w-4 ${isActive ? 'text-emerald-950' : 'text-emerald-ink'}`} />
                 ) : (
                   <span
                     className={`h-2 w-2 rounded-full ${
-                      isActive ? 'bg-slate-950' : 'bg-slate-600 group-hover:bg-slate-400'
+                      isActive ? 'bg-inset' : 'bg-slate-600 group-hover:bg-slate-400'
                     }`}
                   />
                 )}
@@ -270,52 +245,52 @@ export default function HandsOnLabs() {
         {/* Left Column: Incident Description & Criteria */}
         <div className="lg:col-span-5 space-y-6">
           {/* Incident Overview Card */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 space-y-4">
+          <div className="rounded-2xl border border-line bg-surface p-6 space-y-4">
             <div className="flex items-center justify-between gap-2">
               <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${activeChallenge.severityColor}`}>
                 <ShieldAlert className="h-3 w-3" />
                 {activeChallenge.severity}
               </span>
-              <span className="text-xs text-slate-400 uppercase tracking-wide font-normal">
+              <span className="text-xs text-muted uppercase tracking-wide font-normal">
                 {activeChallenge.pillar}
               </span>
             </div>
 
             <div>
-              <h2 className="text-xl font-bold text-white">{activeChallenge.title}</h2>
-              <p className="mt-1 text-xs sm:text-sm text-slate-400">{activeChallenge.subtitle}</p>
+              <h2 className="text-xl font-bold text-ink">{activeChallenge.title}</h2>
+              <p className="mt-1 text-xs sm:text-sm text-muted">{activeChallenge.subtitle}</p>
             </div>
 
-            <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4 text-xs sm:text-sm text-slate-200 leading-relaxed font-sans">
-              <span className="text-rose-400 font-semibold block mb-1">INCIDENT ALERT:</span>
+            <div className="rounded-xl border border-line bg-inset p-4 text-xs sm:text-sm text-ink leading-relaxed font-sans">
+              <span className="text-rose-ink font-semibold block mb-1">INCIDENT ALERT:</span>
               {activeChallenge.incidentSummary}
             </div>
 
             {/* Symptoms & Root Causes */}
             <div className="space-y-3">
-              <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-                <AlertTriangle className="h-3.5 w-3.5 text-amber-400" />
+              <h3 className="text-xs font-bold text-ink uppercase tracking-wider flex items-center gap-1.5">
+                <AlertTriangle className="h-3.5 w-3.5 text-amber-ink" />
                 Telemetry & Symptoms
               </h3>
-              <ul className="space-y-1.5 text-xs text-slate-300">
+              <ul className="space-y-1.5 text-xs text-body">
                 {activeChallenge.symptoms.map((symptom, i) => (
                   <li key={i} className="flex items-start gap-2">
-                    <span className="text-rose-400 font-bold">•</span>
+                    <span className="text-rose-ink font-bold">•</span>
                     <span>{symptom}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="space-y-3 pt-2 border-t border-slate-800/80">
-              <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-                <Wrench className="h-3.5 w-3.5 text-sky-400" />
+            <div className="space-y-3 pt-2 border-t border-line">
+              <h3 className="text-xs font-bold text-ink uppercase tracking-wider flex items-center gap-1.5">
+                <Wrench className="h-3.5 w-3.5 text-sky-ink" />
                 Root Causes to Remediate
               </h3>
-              <ul className="space-y-1.5 text-xs text-slate-300">
+              <ul className="space-y-1.5 text-xs text-body">
                 {activeChallenge.rootCauses.map((cause, i) => (
                   <li key={i} className="flex items-start gap-2">
-                    <span className="text-sky-400 font-bold">•</span>
+                    <span className="text-sky-ink font-bold">•</span>
                     <span>{cause}</span>
                   </li>
                 ))}
@@ -324,16 +299,16 @@ export default function HandsOnLabs() {
           </div>
 
           {/* Validation Checklist Card */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 space-y-4">
-            <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center justify-between">
+          <div className="rounded-2xl border border-line bg-surface p-6 space-y-4">
+            <h3 className="text-xs font-bold text-ink uppercase tracking-wider flex items-center justify-between">
               <span className="flex items-center gap-1.5">
-                <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                <ShieldCheck className="h-4 w-4 text-emerald-ink" />
                 Remediation Criteria ({activeChallenge.criteria.length})
               </span>
               {hasValidated && (
                 <span
-                  className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded ${
-                    allPassed ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
+                  className={`text-xs font-mono font-semibold px-2 py-0.5 rounded ${
+                    allPassed ? 'bg-emerald-soft text-emerald-ink' : 'bg-rose-soft text-rose-ink'
                   }`}
                 >
                   {allPassed ? 'ALL PASSED' : 'ACTION REQUIRED'}
@@ -350,27 +325,27 @@ export default function HandsOnLabs() {
                     className={`rounded-xl border p-3 transition-all ${
                       result
                         ? result.passed
-                          ? 'border-emerald-500/40 bg-emerald-950/20 text-slate-200'
-                          : 'border-rose-500/40 bg-rose-950/20 text-slate-200'
-                        : 'border-slate-800 bg-slate-950/50 text-slate-300'
+                          ? 'border-emerald-line bg-emerald-tint text-ink'
+                          : 'border-rose-line bg-rose-tint text-ink'
+                        : 'border-line bg-inset text-body'
                     }`}
                   >
                     <div className="flex items-start gap-2.5">
                       {result ? (
                         result.passed ? (
-                          <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                          <CheckCircle2 className="h-4 w-4 text-emerald-ink flex-shrink-0 mt-0.5" />
                         ) : (
-                          <XCircle className="h-4 w-4 text-rose-400 flex-shrink-0 mt-0.5" />
+                          <XCircle className="h-4 w-4 text-rose-ink flex-shrink-0 mt-0.5" />
                         )
                       ) : (
-                        <div className="h-4 w-4 rounded-full border border-slate-600 flex-shrink-0 mt-0.5" />
+                        <div className="h-4 w-4 rounded-full border border-line-strong flex-shrink-0 mt-0.5" />
                       )}
                       <div className="flex-1 text-xs">
                         <span className="font-medium">{crit.label}</span>
                         {result && (
                           <p
-                            className={`mt-1 font-mono text-[11px] ${
-                              result.passed ? 'text-emerald-400' : 'text-rose-300'
+                            className={`mt-1 font-mono text-xs ${
+                              result.passed ? 'text-emerald-ink' : 'text-rose-ink'
                             }`}
                           >
                             {result.feedback}
@@ -385,16 +360,16 @@ export default function HandsOnLabs() {
           </div>
 
           {/* Progressive Hint Drawer */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 space-y-3">
+          <div className="rounded-2xl border border-line bg-surface p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-                <Lightbulb className="h-3.5 w-3.5 text-amber-400" />
+              <span className="text-xs font-bold text-ink uppercase tracking-wider flex items-center gap-1.5">
+                <Lightbulb className="h-3.5 w-3.5 text-amber-ink" />
                 Staff Hints ({hintIndex} / {activeChallenge.hints.length})
               </span>
               {hintIndex < activeChallenge.hints.length && (
                 <button
                   onClick={() => setHintIndex((h) => Math.min(h + 1, activeChallenge.hints.length))}
-                  className="text-xs font-mono text-sky-400 hover:text-sky-300 hover:underline"
+                  className="text-xs font-mono text-sky-ink hover:text-sky-ink hover:underline"
                 >
                   Reveal Hint {hintIndex + 1}
                 </button>
@@ -406,15 +381,15 @@ export default function HandsOnLabs() {
                 {activeChallenge.hints.slice(0, hintIndex).map((hint, i) => (
                   <div
                     key={i}
-                    className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200 font-mono"
+                    className="rounded-lg border border-amber-line bg-amber-soft p-3 text-xs text-amber-ink font-mono"
                   >
-                    <span className="font-bold text-amber-400 mr-2">Hint #{i + 1}:</span>
+                    <span className="font-bold text-amber-ink mr-2">Hint #{i + 1}:</span>
                     {hint}
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-slate-400 italic">
+              <p className="text-xs text-muted italic">
                 Stuck on a rule? Click &quot;Reveal Hint&quot; to inspect step-by-step guidance.
               </p>
             )}
@@ -423,24 +398,24 @@ export default function HandsOnLabs() {
 
         {/* Right Column: Code Editor & Action Controls */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl overflow-hidden flex flex-col">
+          <div className="rounded-2xl border border-line bg-inset shadow-lg overflow-hidden flex flex-col">
             {/* Editor Top Bar */}
-            <div className="flex items-center justify-between border-b border-slate-800 bg-slate-900/90 px-4 py-2.5">
+            <div className="flex items-center justify-between border-b border-line bg-surface px-4 py-2.5">
               <div className="flex items-center gap-2">
                 <div className="flex gap-1.5">
-                  <div className="h-3 w-3 rounded-full bg-rose-500/80" />
-                  <div className="h-3 w-3 rounded-full bg-amber-500/80" />
-                  <div className="h-3 w-3 rounded-full bg-emerald-500/80" />
+                  <div className="h-3 w-3 rounded-full bg-rose-soft" />
+                  <div className="h-3 w-3 rounded-full bg-amber-soft" />
+                  <div className="h-3 w-3 rounded-full bg-emerald-soft" />
                 </div>
-                <span className="ml-2 text-xs font-mono text-slate-400 flex items-center gap-1.5">
-                  <FileCode className="h-3.5 w-3.5 text-sky-400" />
+                <span className="ml-2 text-xs font-mono text-muted flex items-center gap-1.5">
+                  <FileCode className="h-3.5 w-3.5 text-sky-ink" />
                   {activeChallenge.filename || (activeChallenge.id === 'k8s-crashloop'
                     ? 'deployment.yaml'
                     : activeChallenge.id === 'docker-multistage'
                     ? 'Dockerfile'
                     : 'main.tf')}
                 </span>
-                <span className="rounded bg-slate-800 px-1.5 py-0.5 text-[10px] font-mono text-slate-400 uppercase">
+                <span className="rounded bg-subtle px-1.5 py-0.5 text-xs font-mono text-muted uppercase">
                   {activeChallenge.language}
                 </span>
               </div>
@@ -448,17 +423,17 @@ export default function HandsOnLabs() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleCopy}
-                  className="flex items-center gap-1 rounded-lg border border-slate-800 bg-slate-900 px-2.5 py-1 text-[11px] text-slate-300 hover:text-white hover:bg-slate-850 transition"
+                  className="flex items-center gap-1 rounded-lg border border-line bg-surface px-2.5 py-1 text-xs text-body hover:text-ink hover:bg-hover transition"
                   title="Copy code"
                 >
                   {copiedCode ? (
                     <>
-                      <Check className="h-3 w-3 text-emerald-400" />
+                      <Check className="h-3 w-3 text-emerald-ink" />
                       <span>Copied</span>
                     </>
                   ) : (
                     <>
-                      <Copy className="h-3 w-3 text-slate-400" />
+                      <Copy className="h-3 w-3 text-muted" />
                       <span>Copy</span>
                     </>
                   )}
@@ -466,19 +441,19 @@ export default function HandsOnLabs() {
 
                 <button
                   onClick={handleReset}
-                  className="flex items-center gap-1 rounded-lg border border-slate-800 bg-slate-900 px-2.5 py-1 text-[11px] text-slate-300 hover:text-white hover:bg-slate-850 transition"
+                  className="flex items-center gap-1 rounded-lg border border-line bg-surface px-2.5 py-1 text-xs text-body hover:text-ink hover:bg-hover transition"
                   title="Reset to starter code"
                 >
-                  <RotateCcw className="h-3 w-3 text-slate-400" />
+                  <RotateCcw className="h-3 w-3 text-muted" />
                   <span>Reset</span>
                 </button>
 
                 <button
                   onClick={() => setShowModelSolution((prev) => !prev)}
-                  className={`flex items-center gap-1 rounded-lg border px-2.5 py-1 text-[11px] transition ${
+                  className={`flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs transition ${
                     showModelSolution
-                      ? 'border-indigo-500/50 bg-indigo-500/20 text-indigo-300'
-                      : 'border-slate-800 bg-slate-900 text-slate-300 hover:text-white'
+                      ? 'border-indigo-line bg-indigo-soft text-indigo-ink'
+                      : 'border-line bg-surface text-body hover:text-ink'
                   }`}
                   title="Toggle model reference solution"
                 >
@@ -499,35 +474,35 @@ export default function HandsOnLabs() {
 
             {/* Model Solution Comparison Banner */}
             {showModelSolution && (
-              <div className="border-b border-indigo-500/30 bg-indigo-950/40 p-4 space-y-3">
+              <div className="border-b border-indigo-line bg-indigo-tint p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
-                    <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
+                  <span className="text-xs font-bold text-indigo-ink flex items-center gap-1.5">
+                    <Sparkles className="h-3.5 w-3.5 text-indigo-ink" />
                     Staff Engineer Model Solution
                   </span>
                   <button
                     onClick={handleApplyModelSolution}
-                    className="text-xs font-mono font-semibold text-sky-400 hover:text-sky-300 bg-slate-900 border border-sky-500/40 rounded px-2.5 py-1"
+                    className="text-xs font-mono font-semibold text-sky-ink hover:text-sky-ink bg-surface border border-sky-line rounded px-2.5 py-1"
                   >
                     Apply into Editor
                   </button>
                 </div>
-                <pre className="max-h-60 overflow-y-auto rounded-lg bg-slate-950 p-3 text-[11px] font-mono text-indigo-200 border border-indigo-500/20">
+                <pre className="max-h-60 overflow-y-auto rounded-lg bg-inset p-3 text-xs font-mono text-indigo-ink border border-indigo-line">
                   {activeChallenge.modelSolution}
                 </pre>
-                <p className="text-[11px] text-slate-300 leading-relaxed font-mono">
-                  <strong className="text-indigo-300">Staff Architecture Rationale: </strong>
+                <p className="text-xs text-body leading-relaxed font-mono">
+                  <strong className="text-indigo-ink">Staff Architecture Rationale: </strong>
                   {activeChallenge.staffEngineeringNotes}
                 </p>
               </div>
             )}
 
             {/* Code Editor Body with Line Numbers */}
-            <div className="relative flex min-h-[460px] bg-[#0b0f19] font-mono text-xs leading-relaxed">
+            <div className="relative flex min-h-[460px] bg-page font-mono text-xs leading-relaxed">
               {/* Line Numbers Column */}
               <div
                 aria-hidden="true"
-                className="select-none py-4 px-3 text-right text-slate-600 bg-slate-950/60 border-r border-slate-800 font-mono text-xs"
+                className="select-none py-4 px-3 text-right text-muted bg-inset border-r border-line font-mono text-xs"
                 style={{ minWidth: '3.5rem' }}
               >
                 {lineNumbers.map((num) => (
@@ -539,7 +514,7 @@ export default function HandsOnLabs() {
 
               {/* Editable Textarea */}
               <div className="relative flex-1">
-                <textarea
+                <textarea aria-label="Lab configuration editor"
                   ref={textareaRef}
                   value={currentCode}
                   onChange={handleCodeChange}
@@ -547,36 +522,28 @@ export default function HandsOnLabs() {
                   spellCheck={false}
                   autoCapitalize="off"
                   autoComplete="off"
-                  className="w-full h-full min-h-[460px] resize-none bg-transparent p-4 font-mono text-xs leading-6 text-slate-100 placeholder-slate-600 focus:outline-none selection:bg-sky-500/30 selection:text-white"
+                  className="w-full h-full min-h-[460px] resize-none bg-transparent p-4 font-mono text-xs leading-6 text-ink placeholder-muted focus-visible:outline-2 focus-visible:outline-focus selection:bg-sky-soft selection:text-ink"
                 />
               </div>
             </div>
 
             {/* Bottom Actions Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-800 bg-slate-900/90 p-4">
-              <div className="flex items-center gap-2 text-xs text-slate-400 font-normal">
-                <Terminal className="h-4 w-4 text-sky-400" />
-                <span>Press &quot;Validate Solution&quot; to test against automated SRE linters.</span>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line bg-surface p-4">
+              <div className="flex items-center gap-2 text-xs text-muted font-normal">
+                <Terminal className="h-4 w-4 text-sky-ink" />
+                <span>Validate configuration checks. Labs do not execute deployments.</span>
               </div>
 
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleValidate}
-                  disabled={isValidating}
                   className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs sm:text-sm font-semibold transition-colors shadow-sm ${
-                    isValidating
-                      ? 'bg-slate-700 text-slate-300 cursor-not-allowed'
-                      : allPassed
-                      ? 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'
-                      : 'bg-sky-500 text-slate-950 hover:bg-sky-400'
+                    allPassed
+                      ? 'bg-emerald-fill text-ink hover:bg-emerald-fill'
+                      : 'bg-sky-fill text-ink hover:bg-sky-fill'
                   }`}
                 >
-                  {isValidating ? (
-                    <>
-                      <RefreshCw className="h-4 w-4 animate-spin" />
-                      <span>Validating Rules...</span>
-                    </>
-                  ) : allPassed ? (
+                  {allPassed ? (
                     <>
                       <CheckCircle2 className="h-4 w-4" />
                       <span>Passed! Run Again</span>
@@ -592,7 +559,7 @@ export default function HandsOnLabs() {
                 {allPassed && (activeChallengeIndex < LAB_CHALLENGES.length - 1) && (
                   <button
                     onClick={() => handleSelectChallenge(activeChallengeIndex + 1)}
-                    className="flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-200 hover:bg-slate-700 transition-colors"
+                    className="flex items-center gap-1.5 rounded-xl border border-line bg-subtle px-4 py-2.5 text-xs sm:text-sm font-semibold text-ink hover:bg-selected transition-colors"
                   >
                     <span>Next Lab</span>
                     <ChevronRight className="h-4 w-4" />
@@ -607,23 +574,23 @@ export default function HandsOnLabs() {
             <div
               className={`rounded-2xl border p-5 transition-all ${
                 allPassed
-                  ? 'border-emerald-500/40 bg-emerald-950/30'
-                  : 'border-rose-500/40 bg-rose-950/30'
+                  ? 'border-emerald-line bg-emerald-tint'
+                  : 'border-rose-line bg-rose-tint'
               }`}
             >
               <div className="flex items-start gap-3">
                 {allPassed ? (
-                  <CheckCircle2 className="h-6 w-6 text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="h-6 w-6 text-emerald-ink flex-shrink-0 mt-0.5" />
                 ) : (
-                  <XCircle className="h-6 w-6 text-rose-400 flex-shrink-0 mt-0.5" />
+                  <XCircle className="h-6 w-6 text-rose-ink flex-shrink-0 mt-0.5" />
                 )}
                 <div>
-                  <h4 className={`text-sm font-bold ${allPassed ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  <h4 className={`text-sm font-bold ${allPassed ? 'text-emerald-ink' : 'text-rose-ink'}`}>
                     {allPassed
                       ? 'Congratulations! Production Incident Remediated!'
                       : 'Validation Failed: Criteria Not Met'}
                   </h4>
-                  <p className="mt-1 text-xs text-slate-300 leading-relaxed">
+                  <p className="mt-1 text-xs text-body leading-relaxed">
                     {allPassed
                       ? 'All automated linters and security checks passed. Pods will now safely deploy, run as unprivileged users, and prevent cascading cluster outages.'
                       : 'Review the failing checklist criteria on the left column, refine your code, and run validation again.'}

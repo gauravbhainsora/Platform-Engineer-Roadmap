@@ -1,11 +1,10 @@
-import React from 'react';
-import type { Metadata } from 'next';
 import FlashcardDeck from '@/components/flashcards/FlashcardDeck';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Platform Engineering Flashcards | Spaced Repetition & Interview Prep',
   description:
-    'Test and drill your platform engineering, Kubernetes, Linux, and cloud infrastructure knowledge with 3D spaced repetition flashcards.',
+    'Review platform engineering, Kubernetes, Linux, and cloud concepts with flashcards and locally saved review schedules.',
 };
 
 export default function FlashcardsPage() {

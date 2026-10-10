@@ -91,7 +91,7 @@ describe('Data Integrity: Pillars & Metadata', () => {
 
 describe('Data Integrity: Topics & Comprehensive Content', () => {
   it('contains topics across all pillars matching sum of individual pillar arrays', () => {
-    expect(ALL_TOPICS.length).toBeGreaterThanOrEqual(67);
+    expect(ALL_TOPICS.length).toBeGreaterThanOrEqual(73);
     expect(getAllTopics().length).toBe(ALL_TOPICS.length);
 
     const sum =
@@ -136,17 +136,17 @@ describe('Data Integrity: Topics & Comprehensive Content', () => {
 
       // Summary & Content/Overview
       expect(topic.summary.trim().length).toBeGreaterThanOrEqual(20);
-      const content = topic.overview || (topic as any).content;
+      const content = topic.overview;
       expect(content).toBeDefined();
       expect(typeof content).toBe('string');
       expect(content.trim().length).toBeGreaterThanOrEqual(30);
 
       // Key Concepts / Takeaways
-      const keyTakeaways = (topic as any).keyTakeaways || topic.keyConcepts;
+      const keyTakeaways = topic.keyConcepts;
       expect(keyTakeaways).toBeDefined();
       expect(Array.isArray(keyTakeaways)).toBe(true);
       expect(keyTakeaways.length).toBeGreaterThanOrEqual(1);
-      keyTakeaways.forEach((k: any) => {
+      keyTakeaways.forEach((k) => {
         expect(k.title.trim()).not.toBe('');
         expect(k.explanation.trim()).not.toBe('');
       });
@@ -201,8 +201,7 @@ describe('Data Integrity: Topics & Comprehensive Content', () => {
           typeof q.answerIndex === 'number' &&
           q.answerIndex >= 0 &&
           q.answerIndex < q.options.length;
-        const hasCorrectAnswer = (q as any).correctAnswer !== undefined;
-        expect(hasValidAnswerIndex || hasCorrectAnswer).toBe(true);
+        expect(hasValidAnswerIndex).toBe(true);
 
         expect(q.explanation.trim().length).toBeGreaterThanOrEqual(10);
       });

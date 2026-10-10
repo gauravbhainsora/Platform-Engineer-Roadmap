@@ -1,6 +1,5 @@
-import React from 'react';
-import type { Metadata } from 'next';
 import HandsOnLabs from '@/components/labs/HandsOnLabs';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Hands-On Production Labs | Platform Engineer Incident Challenges',

@@ -31,3 +31,6 @@ next-env.d.ts
 
 # agent workspaces
 .agents/
+
+# Local Superdesign context, draft state, and temporary exports
+.superdesign/

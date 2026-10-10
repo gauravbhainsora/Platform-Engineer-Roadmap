@@ -1,8 +1,12 @@
 import { CommandItem, PillarId } from '@/types';
 
 export interface CheatSheetEntry extends CommandItem {
+  id?: string;
   pillarId: PillarId;
   tool: string;
+  command?: string;
+  description?: string;
+  tags?: string[];
 }
 
 export const CHEATSHEET_DATABASE: CheatSheetEntry[] = [
@@ -135,4 +139,240 @@ export const CHEATSHEET_DATABASE: CheatSheetEntry[] = [
   { pillarId: 'observability', tool: 'Alertmanager', cmd: 'amtool silence add alertname=HighCpu --duration=2h', desc: 'Temporarily silence alert during maintenance window', category: 'Alertmanager' },
   { pillarId: 'observability', tool: 'Log Collector', cmd: 'fluent-bit -c /etc/fluent-bit/fluent-bit.conf --dry-run', desc: 'Test Fluent Bit log collection pipeline configuration', category: 'Logging' },
   { pillarId: 'observability', tool: 'Vector', cmd: 'vector validate /etc/vector/vector.yaml', desc: 'Validate Vector log processing topology', category: 'Logging' },
+
+  // ==========================================
+  // Domain 1: Kubernetes Gateway API v1.2 GA (Pillar: containers)
+  // ==========================================
+  {
+    id: 'k8s-gateway-class-list',
+    pillarId: 'containers',
+    tool: 'Gateway API',
+    cmd: 'kubectl get gatewayclass -o wide',
+    command: 'kubectl get gatewayclass -o wide',
+    desc: 'List registered GatewayClasses, their implementing controller drivers, and status conditions',
+    description: 'List registered GatewayClasses, their implementing controller drivers, and status conditions',
+    category: 'Gateway API',
+    example: 'kubectl get gatewayclass -o jsonpath=\'{range .items[*]}{.metadata.name}{"\\t"}{.spec.controllerName}{"\\t"}{.status.conditions[*].type}{"\\n"}{end}\'',
+    tags: ['kubernetes', 'gateway-api', 'gatewayclass', 'networking', 'cncf-2026'],
+  },
+  {
+    id: 'k8s-gateway-list',
+    pillarId: 'containers',
+    tool: 'Gateway API',
+    cmd: 'kubectl get gateway -A -o wide',
+    command: 'kubectl get gateway -A -o wide',
+    desc: 'List all provisioned Gateways across namespaces with assigned IP addresses, listener ports, and programmed status',
+    description: 'List all provisioned Gateways across namespaces with assigned IP addresses, listener ports, and programmed status',
+    category: 'Gateway API',
+    example: 'kubectl get gateway edge-gateway -n infra-gateway -o yaml',
+    tags: ['kubernetes', 'gateway-api', 'gateway', 'load-balancer', 'ingress', 'cncf-2026'],
+  },
+  {
+    id: 'k8s-gateway-httproute-list',
+    pillarId: 'containers',
+    tool: 'Gateway API',
+    cmd: 'kubectl get httproute -A -o wide',
+    command: 'kubectl get httproute -A -o wide',
+    desc: 'List HTTPRoute resources across all namespaces with hostnames, parent Gateways, and programmed route conditions',
+    description: 'List HTTPRoute resources across all namespaces with hostnames, parent Gateways, and programmed route conditions',
+    category: 'Gateway API',
+    example: 'kubectl get httproute order-service-route -n order-app -o jsonpath=\'{.status.parents[*].conditions[*].message}\'',
+    tags: ['kubernetes', 'gateway-api', 'httproute', 'l7-routing', 'cncf-2026'],
+  },
+  {
+    id: 'k8s-gateway-referencegrant-describe',
+    pillarId: 'containers',
+    tool: 'Gateway API',
+    cmd: 'kubectl describe referencegrant -A',
+    command: 'kubectl describe referencegrant -A',
+    desc: 'Inspect ReferenceGrant resources authorizing cross-namespace Secret certificate or Service backend attachments',
+    description: 'Inspect ReferenceGrant resources authorizing cross-namespace Secret certificate or Service backend attachments',
+    category: 'Gateway API',
+    example: 'kubectl describe referencegrant allow-edge-to-backend -n payment-service',
+    tags: ['kubernetes', 'gateway-api', 'referencegrant', 'multi-tenancy', 'security', 'cncf-2026'],
+  },
+
+  // ==========================================
+  // Domain 2: Cilium eBPF Service Mesh & Hubble (Pillar: networking)
+  // ==========================================
+  {
+    id: 'cilium-status-wait',
+    pillarId: 'networking',
+    tool: 'Cilium eBPF',
+    cmd: 'cilium status --wait',
+    command: 'cilium status --wait',
+    desc: 'Verify Cilium agent daemonset health, BPF map allocation, WireGuard encryption status, and Hubble relay state',
+    description: 'Verify Cilium agent daemonset health, BPF map allocation, WireGuard encryption status, and Hubble relay state',
+    category: 'eBPF & Mesh',
+    example: 'cilium status --wait --interactive=false',
+    tags: ['cilium', 'ebpf', 'service-mesh', 'networking', 'wireguard', 'cncf-2026'],
+  },
+  {
+    id: 'cilium-connectivity-test',
+    pillarId: 'networking',
+    tool: 'Cilium eBPF',
+    cmd: 'cilium connectivity test --flow-validation=strict',
+    command: 'cilium connectivity test --flow-validation=strict',
+    desc: 'Run automated cluster-wide multi-node connectivity tests validating pod-to-pod, NodePort, and egress gateway routing',
+    description: 'Run automated cluster-wide multi-node connectivity tests validating pod-to-pod, NodePort, and egress gateway routing',
+    category: 'eBPF & Mesh',
+    example: 'cilium connectivity test --test pod-to-service,client-egress-l7',
+    tags: ['cilium', 'connectivity', 'ebpf', 'validation', 'smoke-test', 'cncf-2026'],
+  },
+  {
+    id: 'hubble-observe-pod',
+    pillarId: 'networking',
+    tool: 'Hubble',
+    cmd: 'hubble observe --pod <pod-name> --protocol http -f',
+    command: 'hubble observe --pod <pod-name> --protocol http -f',
+    desc: 'Stream real-time Layer 7 HTTP request/response flows and latency metrics directly from kernel socket eBPF tracepoints',
+    description: 'Stream real-time Layer 7 HTTP request/response flows and latency metrics directly from kernel socket eBPF tracepoints',
+    category: 'eBPF & Mesh',
+    example: 'hubble observe --namespace checkout --to-label app=payment --verdict DROPPED',
+    tags: ['hubble', 'cilium', 'ebpf', 'observability', 'network-flows', 'l7', 'cncf-2026'],
+  },
+  {
+    id: 'hubble-status-check',
+    pillarId: 'networking',
+    tool: 'Hubble',
+    cmd: 'hubble status',
+    command: 'hubble status',
+    desc: 'Display Hubble Relay connectivity, active gRPC streams, current flow buffer capacity, and connected agent count',
+    description: 'Display Hubble Relay connectivity, active gRPC streams, current flow buffer capacity, and connected agent count',
+    category: 'eBPF & Mesh',
+    example: 'hubble status --relay-address localhost:4245',
+    tags: ['hubble', 'cilium', 'ebpf', 'status', 'relay', 'cncf-2026'],
+  },
+
+  // ==========================================
+  // Domain 3: OpenTelemetry Collector Transformations (Pillar: observability)
+  // ==========================================
+  {
+    id: 'otelcol-validate-config',
+    pillarId: 'observability',
+    tool: 'OpenTelemetry',
+    cmd: 'otelcol-contrib validate --config=otel-collector-config.yaml',
+    command: 'otelcol-contrib validate --config=otel-collector-config.yaml',
+    desc: 'Perform pre-flight syntax and pipeline topology validation for OpenTelemetry Collector receivers, processors, and exporters',
+    description: 'Perform pre-flight syntax and pipeline topology validation for OpenTelemetry Collector receivers, processors, and exporters',
+    category: 'OpenTelemetry',
+    example: 'otelcol-contrib validate --config=/etc/otelcol-contrib/config.yaml',
+    tags: ['opentelemetry', 'otel-collector', 'ottl', 'validation', 'observability', 'cncf-2026'],
+  },
+  {
+    id: 'otelcol-run-pipeline',
+    pillarId: 'observability',
+    tool: 'OpenTelemetry',
+    cmd: 'otelcol-contrib --config otel-collector-config.yaml --feature-gates=pkg.translator.prometheus.NormalizeName',
+    command: 'otelcol-contrib --config otel-collector-config.yaml --feature-gates=pkg.translator.prometheus.NormalizeName',
+    desc: 'Execute OpenTelemetry Contrib collector daemon with specified YAML pipeline config and runtime feature gate flags',
+    description: 'Execute OpenTelemetry Contrib collector daemon with specified YAML pipeline config and runtime feature gate flags',
+    category: 'OpenTelemetry',
+    example: 'otelcol-contrib --config /etc/otelcol/config.yaml --set service.telemetry.logs.level=debug',
+    tags: ['opentelemetry', 'otel-collector', 'pipeline', 'daemon', 'observability', 'cncf-2026'],
+  },
+  {
+    id: 'otelcol-metrics-scrape',
+    pillarId: 'observability',
+    tool: 'OpenTelemetry',
+    cmd: 'curl -s http://localhost:8888/metrics | grep -E "otelcol_processor_dropped|otelcol_receiver_accepted"',
+    command: 'curl -s http://localhost:8888/metrics | grep -E "otelcol_processor_dropped|otelcol_receiver_accepted"',
+    desc: 'Inspect internal collector Prometheus telemetry to monitor OTTL processor drops, memory throttling, and export batches',
+    description: 'Inspect internal collector Prometheus telemetry to monitor OTTL processor drops, memory throttling, and export batches',
+    category: 'OpenTelemetry',
+    example: 'curl -s http://localhost:8888/metrics | grep otelcol_process_uptime',
+    tags: ['opentelemetry', 'metrics', 'monitoring', 'ottl', 'troubleshooting', 'cncf-2026'],
+  },
+
+  // ==========================================
+  // Domain 4: FinOps OpenCost & FOCUS 1.0 (Pillar: cloud)
+  // ==========================================
+  {
+    id: 'opencost-allocation-namespace',
+    pillarId: 'cloud',
+    tool: 'OpenCost',
+    cmd: 'curl -s "http://localhost:9003/allocation/compute?window=7d&aggregate=namespace&accumulate=true" | jq .',
+    command: 'curl -s "http://localhost:9003/allocation/compute?window=7d&aggregate=namespace&accumulate=true" | jq .',
+    desc: 'Query OpenCost REST API to calculate 7-day cumulative CPU, RAM, and GPU dollar costs allocated per Kubernetes namespace',
+    description: 'Query OpenCost REST API to calculate 7-day cumulative CPU, RAM, and GPU dollar costs allocated per Kubernetes namespace',
+    category: 'FinOps & Cost',
+    example: 'curl -s "http://opencost.opencost.svc:9003/allocation/compute?window=today&aggregate=label:app" | jq \'.[].name, .[].totalCost\'',
+    tags: ['opencost', 'finops', 'kubernetes', 'cost-allocation', 'cloud-spend', 'cncf-2026'],
+  },
+  {
+    id: 'opencost-assets-summary',
+    pillarId: 'cloud',
+    tool: 'OpenCost',
+    cmd: 'curl -s "http://localhost:9003/assets?window=yesterday&aggregate=type" | jq .',
+    command: 'curl -s "http://localhost:9003/assets?window=yesterday&aggregate=type" | jq .',
+    desc: 'Inspect breakdown of underlying cloud node infrastructure costs, breaking down active compute versus unallocated idle capacity',
+    description: 'Inspect breakdown of underlying cloud node infrastructure costs, breaking down active compute versus unallocated idle capacity',
+    category: 'FinOps & Cost',
+    example: 'curl -s "http://localhost:9003/assets?window=7d&filterTypes=Node" | jq \'.[].totalCost\'',
+    tags: ['opencost', 'finops', 'assets', 'idle-cost', 'capacity-planning', 'cncf-2026'],
+  },
+  {
+    id: 'focus-schema-query',
+    pillarId: 'cloud',
+    tool: 'FinOps FOCUS',
+    cmd: 'duckdb -c "SELECT ProviderName, BillingAccountId, ChargeCategory, SUM(BilledCost) as TotalSpend FROM \'focus_v1_costs.parquet\' GROUP BY ALL ORDER BY TotalSpend DESC LIMIT 10;"',
+    command: 'duckdb -c "SELECT ProviderName, BillingAccountId, ChargeCategory, SUM(BilledCost) as TotalSpend FROM \'focus_v1_costs.parquet\' GROUP BY ALL ORDER BY TotalSpend DESC LIMIT 10;"',
+    desc: 'Execute SQL query against FOCUS 1.0 standardized multi-cloud billing datasets to aggregate normalized spend by provider and charge category',
+    description: 'Execute SQL query against FOCUS 1.0 standardized multi-cloud billing datasets to aggregate normalized spend by provider and charge category',
+    category: 'FinOps & Cost',
+    example: 'duckdb -c "DESCRIBE SELECT * FROM \'focus_v1_costs.parquet\';"',
+    tags: ['focus-spec', 'finops', 'duckdb', 'cloud-billing', 'multi-cloud', 'cncf-2026'],
+  },
+
+  // ==========================================
+  // Domain 5: Karpenter v1.0 NodePool Autoscaling (Pillar: cloud)
+  // ==========================================
+  {
+    id: 'karpenter-nodepool-get',
+    pillarId: 'cloud',
+    tool: 'Karpenter',
+    cmd: 'kubectl get nodepool -o wide',
+    command: 'kubectl get nodepool -o wide',
+    desc: 'List Karpenter v1.0 NodePools showing capacity limits, consolidation policies, disruption budgets, and current ready nodes',
+    description: 'List Karpenter v1.0 NodePools showing capacity limits, consolidation policies, disruption budgets, and current ready nodes',
+    category: 'Autoscaling',
+    example: 'kubectl get nodepool general-compute -o yaml',
+    tags: ['karpenter', 'kubernetes', 'autoscaling', 'nodepool', 'spot', 'cncf-2026'],
+  },
+  {
+    id: 'karpenter-nodeclaim-get',
+    pillarId: 'cloud',
+    tool: 'Karpenter',
+    cmd: 'kubectl get nodeclaim -o wide',
+    command: 'kubectl get nodeclaim -o wide',
+    desc: 'View active ephemeral NodeClaims provisioned by Karpenter displaying EC2 instance type, zone, and capacity type (Spot vs On-Demand)',
+    description: 'View active ephemeral NodeClaims provisioned by Karpenter displaying EC2 instance type, zone, and capacity type (Spot vs On-Demand)',
+    category: 'Autoscaling',
+    example: 'kubectl get nodeclaim -l karpenter.sh/nodepool=general-compute -o wide',
+    tags: ['karpenter', 'kubernetes', 'nodeclaim', 'ec2', 'spot-instances', 'cncf-2026'],
+  },
+  {
+    id: 'karpenter-ec2nodeclass-get',
+    pillarId: 'cloud',
+    tool: 'Karpenter',
+    cmd: 'kubectl get ec2nodeclass -o wide',
+    command: 'kubectl get ec2nodeclass -o wide',
+    desc: 'Inspect AWS EC2NodeClass configuration verifying subnet selectors, security group IDs, AMI family, and IAM instance role bindings',
+    description: 'Inspect AWS EC2NodeClass configuration verifying subnet selectors, security group IDs, AMI family, and IAM instance role bindings',
+    category: 'Autoscaling',
+    example: 'kubectl describe ec2nodeclass default-ec2',
+    tags: ['karpenter', 'aws', 'ec2nodeclass', 'infrastructure', 'cloud', 'cncf-2026'],
+  },
+  {
+    id: 'karpenter-logs-stream',
+    pillarId: 'cloud',
+    tool: 'Karpenter',
+    cmd: 'kubectl logs -l app.kubernetes.io/name=karpenter -n kube-system -f --tail=100',
+    command: 'kubectl logs -l app.kubernetes.io/name=karpenter -n kube-system -f --tail=100',
+    desc: 'Stream live Karpenter controller scheduling logs to monitor bin-packing calculations, node consolidation, and spot interruption draining',
+    description: 'Stream live Karpenter controller scheduling logs to monitor bin-packing calculations, node consolidation, and spot interruption draining',
+    category: 'Autoscaling',
+    example: 'kubectl logs -l app.kubernetes.io/name=karpenter -n kube-system --tail=200 | grep -E "found provisionable pod|consolidating node"',
+    tags: ['karpenter', 'kubernetes', 'logs', 'consolidation', 'troubleshooting', 'cncf-2026'],
+  },
 ];

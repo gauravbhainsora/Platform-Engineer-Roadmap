@@ -288,88 +288,148 @@ export const OBSERVABILITY_TOPICS: TopicItem[] = [
     "pillarId": "observability",
     "branch": "right",
     "order": 4,
-    "title": "Distributed Tracing (OpenTelemetry)",
-    "subtitle": "OpenTelemetry (OTel), traces, spans, W3C TraceContext propagation, Jaeger, and Tempo",
+    "title": "Distributed Tracing & W3C Baggage Propagation (OpenTelemetry)",
+    "subtitle": "OTel spans, W3C traceparent & baggage headers, context propagation, BaggageSpanProcessor & Tempo",
     "level": "Advanced",
-    "estimatedMinutes": 30,
+    "estimatedMinutes": 35,
     "tags": [
       "Distributed Tracing",
       "OpenTelemetry",
       "OTel",
+      "W3C TraceContext",
+      "W3C Baggage",
+      "BaggageSpanProcessor",
       "Jaeger",
       "Tempo",
-      "W3C TraceContext"
+      "SRE"
     ],
-    "summary": "Trace request journeys across microservice boundaries: identify latency bottlenecks, visualize execution flow, and correlate traces with logs using OpenTelemetry.",
-    "overview": "In distributed microservices, a single user click can traverse 15 services (API Gateway -> Auth -> Order -> Inventory -> Payment -> DB). If the request takes 4 seconds, traditional logs cannot pinpoint which service caused the delay. Distributed tracing solves this.\n\nKey Concepts:\n1. OpenTelemetry (OTel):\n   - CNCF industry standard unifying APIs, SDKs, and tooling to collect traces, metrics, and logs.\n2. Traces and Spans:\n   - Trace: The complete end-to-end journey of a request through the distributed system.\n   - Span: A single unit of contiguous work (e.g. an HTTP handler execution, database query, or gRPC call). Contains start/end timestamps, tags, events, and status.\n3. Context Propagation (W3C TraceContext):\n   - When Service A calls Service B, it injects standard HTTP headers:\n     `traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01`\n   - Service B extracts the header, making its spans children of the upstream span.\n4. Visualization Backends:\n   - Jaeger and Grafana Tempo display waterfall charts pinpointing exactly where milliseconds were spent.",
+    "summary": "Trace request journeys across microservice boundaries: master W3C traceparent (telemetry DAG) and baggage (in-band metadata) propagation, OpenTelemetry Baggage API, and BaggageSpanProcessor span indexing.",
+    "overview": "In distributed microservices, a single user transaction can traverse 15 downstream services (API Gateway -> Auth -> Order -> Inventory -> Payment -> DB). If the request latency spikes to 4 seconds, isolated service logs cannot pinpoint which hop caused the bottleneck. OpenTelemetry distributed tracing and W3C context propagation solve this challenge by linking cross-service execution paths and propagating contextual metadata.\n\nCore Architectural Concepts:\n1. OpenTelemetry Traces and Spans:\n   - Trace: The complete directed acyclic graph (DAG) of work representing an end-to-end user request.\n   - Span: A single contiguous block of execution within a service, containing start/end timestamps, status codes, events, and key-value attributes.\n2. W3C TraceContext Specification (`traceparent`):\n   - Standardized HTTP header establishing causal parent-child span relationships:\n     `traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01`\n   - Composed of 4 hyphen-delimited fields: Version (00), 16-byte Trace ID, 8-byte Parent Span ID, and Trace Flags (01 = sampled).\n3. W3C Baggage Specification (`baggage`):\n   - Standardized HTTP header propagating application-specific contextual metadata across process boundaries:\n     `baggage: tenant.id=acme-corp,user.tier=enterprise,region=us-east-1`\n   - Baggage carries cross-cutting business context (routing lanes, tenant tiers, transaction types) without requiring intermediate services to deserialize payload bodies or query databases.\n4. Critical Difference: Baggage vs Traceparent:\n   - `traceparent` is managed by the tracing engine and automatically constructs span trees in Jaeger and Tempo.\n   - `baggage` lives strictly in memory within the distributed context. By default, OpenTelemetry DOES NOT add baggage entries as span attributes or export them to tracing backends!\n5. The Bridge: `BaggageSpanProcessor`:\n   - To visualize baggage values in waterfall charts or search traces by `tenant.id`, a `BaggageSpanProcessor` intercepts span creation (`on_start`) and copies allowlisted baggage keys directly into span attributes.\n6. Security, Privacy & Reliability Guardrails:\n   - Cleartext Risk: Baggage travels unencrypted in HTTP headers. Egress calls to external 3rd-party APIs (Stripe, Twilio) must explicitly strip baggage to avoid leaking internal metadata.\n   - Header Bloat: Unbounded baggage appending risks HTTP 431 Request Header Fields Too Large.\n   - Edge Validation: Edge API Gateways must sanitize untrusted inbound `baggage` headers to prevent privilege spoofing.",
     "keyConcepts": [
       {
-        "title": "Waterfall Visualizations",
-        "explanation": "Displays all spans hierarchically along a time axis, immediately exposing whether latency was caused by slow database queries, sequential external HTTP calls, or CPU contention."
+        "title": "W3C Traceparent vs Baggage Propagation",
+        "explanation": "traceparent defines the causal telemetry graph (trace ID, parent span ID, sampling flag) parsed by tracing collectors. baggage carries in-band application metadata (tenant ID, account tier) across network hops without requiring intermediate microservices to alter database schemas or payload contracts."
       },
       {
-        "title": "W3C TraceContext Standard",
-        "explanation": "Standardizes header propagation (`traceparent` and `tracestate`) across heterogeneous languages (Go, Java, Node.js, Python), enabling end-to-end tracing across diverse tech stacks."
+        "title": "The BaggageSpanProcessor Bridge",
+        "explanation": "Baggage values exist purely in runtime context and are NOT recorded on spans or sent to Grafana Tempo/Jaeger by default. A BaggageSpanProcessor inspects active baggage on span creation and selectively copies approved keys into span attributes for indexing and search."
+      },
+      {
+        "title": "Baggage Security Boundaries & Egress Sanitization",
+        "explanation": "Baggage is transmitted in plain text across HTTP/gRPC. Platform engineers must enforce gateway sanitization to reject spoofed edge headers, prune outbound headers to prevent HTTP 431 overflows, and strip baggage when dispatching calls to third-party vendor APIs."
       }
     ],
     "diagram": {
-      "title": "Distributed Trace Waterfall Timeline",
+      "title": "W3C TraceContext & Baggage Propagation Flow",
       "type": "ascii",
-      "code": "[Trace: Total Duration = 850ms]\n|=============================================================================|\n  [Span: API Gateway - /checkout] (850ms)\n  |===========================================================================|\n    [Span: Auth-Service - verify_jwt] (40ms)\n    |====|\n    [Span: Order-Service - create_order] (780ms)\n         |====================================================================|\n         [Span: PostgreSQL - INSERT INTO orders] (25ms)\n         |==|\n         [Span: Payment-Service - charge_card] (720ms) <=== BOTTLENECK DETECTED!\n              |===============================================================|"
+      "code": "[External Client] --(HTTP POST /checkout)--> [API Gateway]\n                                                    |\n  +-------------------------------------------------+-------------------------------------------------+\n  | Injects W3C Context Propagation Headers:                                                          |\n  | 1. traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01 (Causal Graph)            |\n  | 2. baggage: tenant.id=acme-corp,user.tier=enterprise (In-Band Business Metadata)                   |\n  +-------------------------------------------------+-------------------------------------------------+\n                                                    |\n                                                    v\n                                        [Order Service (Pod 1)]\n                                        |-- Extracts traceparent & baggage into active context\n                                        |-- BaggageSpanProcessor copies 'tenant.id' to Span Attributes\n                                        |-- Starts span: 'order.process' (attributes: tenant.id=acme-corp)\n                                                    |\n                           +------------------------+------------------------+\n                           | (HTTP Request with traceparent & baggage)       |\n                           v                                                 v\n               [Inventory Service (Pod 2)]                       [Payment Gateway (External)]\n               |-- Inherits baggage: user.tier=enterprise        |-- Egress Filter Strips 'baggage'\n               |-- Prioritizes queue for 'enterprise'            +-- Prevents internal metadata leak!\n                           |\n                           v\n              [Grafana Tempo / Jaeger Backend]\n              (Waterfall trace searchable by tag: tenant.id = \"acme-corp\")"
     },
     "commands": [
       {
-        "cmd": "curl -s http://localhost:16686/api/traces?service=order-api | jq .",
-        "desc": "Query Jaeger REST API for recent service traces",
-        "example": "curl -s ..."
+        "cmd": "curl -v -H \"traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01\" -H \"baggage: tenant.id=acme-corp,user.tier=enterprise\" http://localhost:8080/api/v1/orders",
+        "desc": "Simulate inbound HTTP request injecting both W3C traceparent and baggage headers",
+        "example": "curl -v -H \"traceparent: ...\" -H \"baggage: ...\" http://localhost:8080/api/v1/orders"
+      },
+      {
+        "cmd": "otel-cli exec --service order-service --name \"process_order\" --baggage \"tenant.id=acme-corp,tier=enterprise\" curl -s http://payment-service:8080/charge",
+        "desc": "Execute synthetic trace span and propagate baggage using OpenTelemetry CLI",
+        "example": "otel-cli exec --service order-service ..."
+      },
+      {
+        "cmd": "hubble observe --pod payment-pod --protocol http -o jsonpb | jq '.flow.l7.http.headers[] | select(.key==\"baggage\" or .key==\"traceparent\")'",
+        "desc": "Inspect W3C traceparent and baggage headers traversing Kubernetes pods via Cilium Hubble eBPF",
+        "example": "hubble observe --pod payment-pod ..."
+      },
+      {
+        "cmd": "curl -s \"http://localhost:16686/api/traces?service=order-service&tags=%7B%22tenant.id%22%3A%22acme-corp%22%7D\" | jq .",
+        "desc": "Query Jaeger REST API for distributed traces filtered by indexed baggage span attribute",
+        "example": "curl -s \"http://localhost:16686/api/traces?service=order-service&tags=...\""
       }
     ],
     "productionCode": {
       "language": "python",
-      "filename": "otel_instrumentation.py",
-      "code": "# Production OpenTelemetry automatic trace instrumentation with OTLP exporter\nfrom opentelemetry import trace\nfrom opentelemetry.sdk.trace import TracerProvider\nfrom opentelemetry.sdk.trace.export import BatchSpanProcessor\nfrom opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter\nfrom opentelemetry.sdk.resources import Resource\n\n# Configure service resource metadata\nresource = Resource.create({\"service.name\": \"checkout-service\", \"deployment.environment\": \"production\"})\nprovider = TracerProvider(resource=resource)\n\n# Export via gRPC to OpenTelemetry Collector or Grafana Tempo\notlp_exporter = OTLPSpanExporter(endpoint=\"otel-collector.monitoring:4317\", insecure=True)\nprovider.add_span_processor(BatchSpanProcessor(otlp_exporter))\ntrace.set_tracer_provider(provider)\n\ntracer = trace.get_tracer(__name__)\n\ndef process_checkout_span(order_id: str):\n    with tracer.start_as_current_span(\"process_checkout\") as span:\n        span.set_attribute(\"order.id\", order_id)\n        # Execute work...\n        span.add_event(\"Inventory reserved\")",
-      "explanation": "Initializes OpenTelemetry TracerProvider with an OTLP gRPC exporter and instruments an execution span."
+      "filename": "otel_baggage_instrumentation.py",
+      "code": "# Production OpenTelemetry Tracing & W3C Baggage Propagation with BaggageSpanProcessor\nimport requests\nfrom opentelemetry import trace, baggage, context\nfrom opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator\nfrom opentelemetry.baggage.propagation import W3CBaggagePropagator\nfrom opentelemetry.propagators.composite import CompositePropagator\nfrom opentelemetry.sdk.trace import TracerProvider, SpanProcessor\nfrom opentelemetry.sdk.trace.export import BatchSpanProcessor\nfrom opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter\nfrom opentelemetry.sdk.resources import Resource\n\n# Configure composite propagator for W3C TraceContext and W3C Baggage\ncomposite_propagator = CompositePropagator([\n    TraceContextTextMapPropagator(),\n    W3CBaggagePropagator(),\n])\ntrace.set_tracer_provider(TracerProvider(\n    resource=Resource.create({\"service.name\": \"order-service\", \"deployment.environment\": \"production\"})\n))\n\n# Custom BaggageSpanProcessor: copies allowlisted baggage keys into span attributes for indexing\nclass BaggageSpanProcessor(SpanProcessor):\n    def __init__(self, allowed_keys=None):\n        self.allowed_keys = set(allowed_keys or [\"tenant.id\", \"user.tier\", \"transaction.type\"])\n\n    def on_start(self, span, parent_context=None):\n        ctx = parent_context or context.get_current()\n        for key in self.allowed_keys:\n            val = baggage.get_baggage(key, ctx)\n            if val is not None:\n                span.set_attribute(f\"baggage.{key}\", val)\n\n    def on_end(self, span):\n        pass\n\n# Register processors\nprovider = trace.get_tracer_provider()\notlp_exporter = OTLPSpanExporter(endpoint=\"otel-collector.monitoring:4317\", insecure=True)\nprovider.add_span_processor(BaggageSpanProcessor())\nprovider.add_span_processor(BatchSpanProcessor(otlp_exporter))\ntracer = trace.get_tracer(__name__)\n\ndef handle_incoming_request(incoming_headers: dict):\n    # 1. Extract W3C traceparent and baggage from incoming HTTP headers into active context\n    extracted_ctx = composite_propagator.extract(incoming_headers)\n    token = context.attach(extracted_ctx)\n    try:\n        # 2. Enrich context with new business baggage\n        updated_ctx = baggage.set_baggage(\"tenant.id\", \"acme-corp\")\n        updated_ctx = baggage.set_baggage(\"user.tier\", \"enterprise\", updated_ctx)\n        context.attach(updated_ctx)\n\n        # 3. Start span (BaggageSpanProcessor automatically attaches baggage.* attributes)\n        with tracer.start_as_current_span(\"process_order\") as span:\n            span.set_attribute(\"order.id\", \"ord-8921\")\n            \n            # 4. Propagate headers downstream to payment service\n            outbound_headers = {}\n            composite_propagator.inject(outbound_headers)\n            # outbound_headers now contains valid 'traceparent' and 'baggage'\n            response = requests.post(\"http://payment-service:8080/charge\", headers=outbound_headers, timeout=5)\n            return response.status_code\n    finally:\n        context.detach(token)",
+      "explanation": "Production OpenTelemetry configuration setting up composite W3C TraceContext + Baggage propagators, an allowlisted BaggageSpanProcessor to bridge context metadata into queryable span attributes, and automated outbound header injection."
     },
     "gotchas": [
       {
-        "issue": "Forgetting to propagate trace headers when making outbound HTTP requests",
-        "resolution": "If Service A calls Service B with a plain HTTP client without injecting the `traceparent` header, the trace breaks into two disconnected traces. Use OpenTelemetry auto-instrumentation libraries to inject headers automatically.",
+        "issue": "Assuming baggage entries automatically appear as span attributes in Jaeger or Tempo",
+        "resolution": "Baggage is strictly an in-memory context propagation mechanism. By default, OpenTelemetry will not persist baggage onto spans. Always deploy a BaggageSpanProcessor with a strict allowlist to copy designated keys (e.g. tenant.id) onto span attributes.",
         "severity": "critical"
+      },
+      {
+        "issue": "Leaking internal organizational metadata to external third-party APIs via outbound baggage headers",
+        "resolution": "Default HTTP client instrumentation auto-injects baggage into every outbound HTTP request. When calling external SaaS vendors (e.g. Stripe, Twilio), configure egress HTTP interceptors to strip or omit the 'baggage' header to prevent data leaks.",
+        "severity": "critical"
+      },
+      {
+        "issue": "HTTP 431 Request Header Fields Too Large caused by unbounded baggage appending across microservices",
+        "resolution": "As requests traverse deep call graphs, each service appending baggage entries causes header sizes to balloon past standard 8KB proxy limits. Enforce strict character limits and prune transient baggage keys at intermediate gateways.",
+        "severity": "warning"
+      },
+      {
+        "issue": "Using unauthenticated W3C Baggage for authorization or billing enforcement",
+        "resolution": "W3C Baggage is not cryptographically signed (unlike JWTs). Untrusted edge clients can spoof headers like 'baggage: user.tier=admin'. Always strip untrusted baggage at the public API Gateway and populate baggage only from authenticated session tokens.",
+        "severity": "warning"
       }
     ],
     "interviewQuestions": [
       {
-        "question": "What is the difference between a Trace and a Span in OpenTelemetry?",
-        "answer": "A Span is a single unit of contiguous work within a service, tracking a start time, duration, attributes, and status (e.g. a SQL query or HTTP request). A Trace is the complete directed acyclic graph (DAG) of Spans representing the end-to-end journey of a request as it traverses multiple distributed services.",
-        "platformContext": "Core telemetry question in distributed systems interviews."
+        "question": "What is the primary difference between W3C traceparent and baggage HTTP headers in OpenTelemetry?",
+        "answer": "The 'traceparent' header defines the distributed causal graph (version, 16-byte trace ID, 8-byte parent span ID, sampling flags) and is automatically consumed by tracing engines to assemble span waterfalls. The 'baggage' header carries cross-cutting application metadata (like tenant ID or account tier) across service hops in memory without requiring intermediate services to deserialize business payloads. Critically, baggage entries are NOT automatically stored as span attributes or exported to trace backends unless explicitly bridged using a BaggageSpanProcessor.",
+        "platformContext": "Senior/Staff Platform and SRE interview question assessing distributed systems telemetry architecture and context propagation standards."
+      },
+      {
+        "question": "Why does OpenTelemetry avoid copying all baggage entries into span attributes by default, and how should platform teams manage this?",
+        "answer": "Automatically copying all baggage into span attributes would trigger massive high-cardinality storage explosions and unintentional PII leakage into tracing backends (like Grafana Tempo or Jaeger). Platform teams should implement a BaggageSpanProcessor with a strict allowlist (e.g., only allowing 'tenant.id' and 'routing.tier') to index necessary routing dimensions while protecting TSDB cardinality and compliance.",
+        "platformContext": "Core telemetry architecture question regarding storage economics and FinOps cardinality management."
       }
     ],
     "references": [
       {
-        "title": "OpenTelemetry Official Documentation",
-        "url": "https://opentelemetry.io/docs/",
-        "source": "CNCF",
-        "type": "official"
+        "title": "W3C Baggage Specification",
+        "url": "https://www.w3.org/TR/baggage/",
+        "source": "W3C",
+        "type": "spec"
       },
       {
         "title": "W3C Trace Context Specification",
         "url": "https://www.w3.org/TR/trace-context/",
         "source": "W3C",
         "type": "spec"
+      },
+      {
+        "title": "OpenTelemetry Baggage API Specification",
+        "url": "https://opentelemetry.io/docs/specs/otel/baggage/api/",
+        "source": "CNCF OpenTelemetry",
+        "type": "official"
       }
     ],
     "quiz": [
       {
         "id": "q1",
-        "question": "What is the standard W3C HTTP header used to propagate distributed trace context across microservice network boundaries?",
+        "question": "What is the primary difference between the W3C 'traceparent' and 'baggage' HTTP headers in OpenTelemetry?",
         "options": [
-          "traceparent",
-          "x-request-id",
-          "correlation-token",
-          "otel-span"
+          "traceparent builds the distributed span execution graph, while baggage propagates cross-cutting in-band metadata across hops without automatically creating span attributes",
+          "traceparent carries user business metadata, while baggage carries the 16-byte distributed trace ID",
+          "traceparent is only supported in Python, while baggage is only supported in Go and Java",
+          "baggage is automatically indexed as span attributes in Tempo, while traceparent requires a custom processor"
         ],
         "answerIndex": 0,
-        "explanation": "The W3C TraceContext specification standardizes the 'traceparent' header."
+        "explanation": "traceparent standardizes causal trace and span IDs, whereas baggage transports application metadata across service hops in-memory and requires a BaggageSpanProcessor to become queryable span attributes."
+      },
+      {
+        "id": "q2",
+        "question": "Why is it dangerous to allow default OpenTelemetry auto-instrumentation to inject baggage into outbound HTTP calls to third-party external APIs?",
+        "options": [
+          "Third-party APIs reject all requests containing HTTP headers longer than 10 bytes",
+          "Internal business context (such as tenant IDs, internal account numbers, or cluster topology) leaks to external vendors in cleartext headers",
+          "Outbound baggage injection will corrupt the local operating system kernel routing table",
+          "Baggage injection causes the external vendor to bill your cloud account twice"
+        ],
+        "answerIndex": 1,
+        "explanation": "Because baggage travels in cleartext HTTP headers, propagating it to external third-party services leaks sensitive internal operational and business metadata."
       }
     ]
   },
@@ -639,7 +699,7 @@ export const OBSERVABILITY_TOPICS: TopicItem[] = [
     "estimatedMinutes": 35,
     "tags": ["OpenTelemetry", "OTel Collector", "OTTL", "Pipelines", "Observability", "FinOps", "SRE"],
     "summary": "Build vendor-neutral telemetry pipelines. Use OpenTelemetry Transformation Language (OTTL) to sanitize PII, drop noisy data, and control cardinality in-flight.",
-    "overview": "Sending raw telemetry directly from client SDKs to observability backends creates vendor lock-in, leaks sensitive PII into third-party clouds, and drives catastrophic ingestion bills.\n\nThe OpenTelemetry Collector acts as a vendor-neutral proxy:\n1. Pipeline Architecture:\n   - Receivers: Ingest OTLP, Prometheus, Zipkin, or Fluent Bit streams.\n   - Processors: Modify, filter, batch, and transform data in memory.\n   - Exporters: Route transformed telemetry to Prometheus, Tempo, Datadog, or S3.\n2. OTTL (OpenTelemetry Transformation Language):\n   - Standardized expression language for in-flight telemetry modification.\n   - Contexts: Operates on resource, scope, span, metric, or log.\n   - Functions: set, replace_pattern, delete_key, drop, IsMatch.\n3. Real-World Use Cases:\n   - Redacting PII: Masking credit cards, authorization bearer tokens, and emails using regex.\n   - Cardinality Control: Stripping random UUIDs or customer IDs from metric labels to prevent TSDB crashes.\n   - Cost Reduction: Dropping 200 OK health-check spans while retaining 100% of 5xx error traces.",
+    "overview": "Sending raw telemetry directly from client SDKs to observability backends creates vendor lock-in, leaks sensitive PII into third-party clouds, and drives catastrophic ingestion bills.\n\nThe OpenTelemetry Collector acts as a vendor-neutral proxy:\n1. Pipeline Architecture:\n   - Receivers: Ingest OTLP, Prometheus, Zipkin, or Fluent Bit streams.\n   - Processors: Modify, filter, batch, and transform data in memory.\n   - Exporters: Route transformed telemetry to Prometheus, Tempo, Datadog, or S3.\n2. OTTL (OpenTelemetry Transformation Language):\n   - Standardized expression language for in-flight telemetry modification.\n   - Contexts: Operates on resource, scope, span, metric, or log.\n   - Functions: set, replace_pattern, delete_key, drop, IsMatch.\n3. Real-World Use Cases:\n   - Redacting PII: Masking credit cards, authorization bearer tokens, and emails using regex.\n   - Baggage Extraction & Sanitization: Scrubbing or filtering sensitive baggage attributes bridged from upstream requests before exporting to external analytics or SaaS tracing vendors.\n   - Cardinality Control: Stripping random UUIDs or customer IDs from metric labels to prevent TSDB crashes.\n   - Cost Reduction: Dropping 200 OK health-check spans while retaining 100% of 5xx error traces.",
     "keyConcepts": [
       {
         "title": "Collector Pipeline Composition",
@@ -663,14 +723,19 @@ export const OBSERVABILITY_TOPICS: TopicItem[] = [
     "productionCode": {
       "language": "yaml",
       "filename": "otel-collector-transform.yaml",
-      "code": "processors:\n  memory_limiter:\n    check_interval: 1s\n    limit_percentage: 75\n    spike_limit_percentage: 20\n\n  transform:\n    error_mode: ignore\n    trace_statements:\n      - context: span\n        statements:\n          - replace_pattern(attributes[\"http.request.header.authorization\"], \"Bearer .*\", \"Bearer [REDACTED]\")\n          - delete_key(attributes, \"debug.verbose_payload\")\n          - set(attributes[\"sla.breached\"], \"true\") where duration > 2000000000\n    \n    log_statements:\n      - context: log\n        statements:\n          - replace_pattern(body, \"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\\\.[a-zA-Z]{2,}\", \"[EMAIL_REDACTED]\")\n\n  filter/drop_noisy_spans:\n    error_mode: ignore\n    traces:\n      span:\n        - 'attributes[\"http.target\"] == \"/healthz\" and status.code == 0'\n\nservice:\n  pipelines:\n    traces:\n      receivers: [otlp]\n      processors: [memory_limiter, filter/drop_noisy_spans, transform, batch]\n      exporters: [otlp/tempo]",
-      "explanation": "Production OpenTelemetry Collector pipeline demonstrating memory limiting, OTTL-driven PII redaction, SLA breaching tagging, and automated dropping of noisy health checks."
+      "code": "processors:\n  memory_limiter:\n    check_interval: 1s\n    limit_percentage: 75\n    spike_limit_percentage: 20\n\n  transform:\n    error_mode: ignore\n    trace_statements:\n      - context: span\n        statements:\n          # Redact sensitive authorization tokens from span attributes\n          - replace_pattern(attributes[\"http.request.header.authorization\"], \"Bearer .*\", \"Bearer [REDACTED]\")\n          # Sanitize baggage attributes bridged via BaggageSpanProcessor\n          - replace_pattern(attributes[\"baggage.customer_email\"], \".*@.*\", \"[EMAIL_REDACTED]\")\n          - delete_key(attributes, \"baggage.internal_secret_token\")\n          # Route high-priority tenants to premium SLA lane based on baggage tier\n          - set(attributes[\"sla.priority\"], \"vip\") where attributes[\"baggage.user.tier\"] == \"enterprise\"\n          - delete_key(attributes, \"debug.verbose_payload\")\n          - set(attributes[\"sla.breached\"], \"true\") where duration > 2000000000\n    \n    log_statements:\n      - context: log\n        statements:\n          - replace_pattern(body, \"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\\\.[a-zA-Z]{2,}\", \"[EMAIL_REDACTED]\")\n\n  filter/drop_noisy_spans:\n    error_mode: ignore\n    traces:\n      span:\n        - 'attributes[\"http.target\"] == \"/healthz\" and status.code == 0'\n\nservice:\n  pipelines:\n    traces:\n      receivers: [otlp]\n      processors: [memory_limiter, filter/drop_noisy_spans, transform, batch]\n      exporters: [otlp/tempo]",
+      "explanation": "Production OpenTelemetry Collector pipeline demonstrating memory limiting, OTTL-driven PII redaction and baggage attribute sanitization, SLA breaching tagging, and automated dropping of noisy health checks."
     },
     "gotchas": [
       {
         "issue": "Collector OOM crashes under telemetry burst traffic",
         "resolution": "Always place the 'memory_limiter' processor as the first processor in your pipeline, and set GOMEMLIMIT environment variable to 80% of container memory limit.",
         "severity": "critical"
+      },
+      {
+        "issue": "Leaking unredacted baggage attributes to third-party tracing SaaS backends",
+        "resolution": "Use the OTTL transform processor with delete_key and replace_pattern to scrub sensitive baggage attributes (such as customer emails or internal tokens) before export.",
+        "severity": "warning"
       }
     ],
     "interviewQuestions": [

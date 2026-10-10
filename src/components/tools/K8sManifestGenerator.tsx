@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Box, Copy, Check, ShieldCheck, Download } from 'lucide-react';
+import { validateManifestInputs } from '@/lib/manifest';
+import { Box, Check, Copy, ShieldCheck } from 'lucide-react';
+import { useState } from 'react';
 
 export function K8sManifestGenerator() {
   const [appName, setAppName] = useState('payment-api');
@@ -17,15 +18,17 @@ export function K8sManifestGenerator() {
   const [dropCaps, setDropCaps] = useState(true);
   const [includeProbes, setIncludeProbes] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState('');
+  const errors = validateManifestInputs({ appName, image, replicas, port, cpuLimit, memLimit });
 
   const generateYaml = () => {
     return `apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ${appName}
+  name: ${JSON.stringify(appName)}
   namespace: production
   labels:
-    app: ${appName}
+    app: ${JSON.stringify(appName)}
     tier: backend
 spec:
   replicas: ${replicas}
@@ -37,11 +40,11 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: ${appName}
+      app: ${JSON.stringify(appName)}
   template:
     metadata:
       labels:
-        app: ${appName}
+        app: ${JSON.stringify(appName)}
     spec:
       securityContext:
         ${runAsNonRoot ? `runAsNonRoot: true
@@ -52,7 +55,7 @@ spec:
           type: RuntimeDefault` : '# Caution: Root execution enabled'}
       containers:
       - name: app
-        image: ${image}
+        image: ${JSON.stringify(image)}
         ports:
         - containerPort: ${port}
         securityContext:
@@ -63,8 +66,8 @@ spec:
             - ALL` : ''}
         resources:
           limits:
-            cpu: "${cpuLimit}"
-            memory: "${memLimit}"
+            cpu: ${JSON.stringify(cpuLimit)}
+            memory: ${JSON.stringify(memLimit)}
           requests:
             cpu: "100m"
             memory: "128Mi"
@@ -91,36 +94,39 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ${appName}
+  name: ${JSON.stringify(appName)}
   namespace: production
 spec:
   type: ClusterIP
   selector:
-    app: ${appName}
+    app: ${JSON.stringify(appName)}
   ports:
   - port: 80
     targetPort: ${port}
 `;
   };
 
-  const yamlOutput = generateYaml();
+  const yamlOutput = errors.length ? '' : generateYaml();
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(yamlOutput);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopy = async () => {
+    if (errors.length) return;
+    try {
+      await navigator.clipboard.writeText(yamlOutput);
+      setCopied(true); setCopyError('');
+      setTimeout(() => setCopied(false), 2000);
+    } catch { setCopyError('Could not copy the manifest. Select and copy the output manually.'); }
   };
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 sm:p-8 shadow-2xl">
-      <div className="flex items-center gap-3 border-b border-slate-800 pb-4 mb-6">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+    <div className="rounded-2xl border border-line bg-surface p-6 sm:p-8 shadow-lg">
+      <div className="flex items-center gap-3 border-b border-line pb-4 mb-6">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-soft text-emerald-ink border border-emerald-line">
           <Box className="h-5 w-5" />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-white">Kubernetes Hardened Manifest Generator</h2>
-          <p className="text-xs text-slate-400">
-            Configure secure, production-grade Deployment and Service manifests with CIS security standards
+          <h2 className="text-lg font-bold text-ink">Kubernetes Hardened Manifest Generator</h2>
+          <p className="text-xs text-muted">
+            Generate Deployment and Service examples with configurable security and health probes
           </p>
         </div>
       </div>
@@ -130,46 +136,49 @@ spec:
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-mono font-semibold text-slate-300 uppercase mb-1.5">
+              <label className="block text-xs font-mono font-semibold text-body uppercase mb-1.5">
                 Service Name
               </label>
-              <input
+              <input aria-label="Service Name"
                 type="text"
                 value={appName}
                 onChange={(e) => setAppName(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 font-mono text-xs text-slate-200 focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-xl border border-line bg-inset px-3.5 py-2 font-mono text-xs text-ink focus:border-emerald-line focus-visible:outline-2 focus-visible:outline-focus"
               />
             </div>
             <div>
-              <label className="block text-xs font-mono font-semibold text-slate-300 uppercase mb-1.5">
+              <label className="block text-xs font-mono font-semibold text-body uppercase mb-1.5">
                 Target Port
               </label>
-              <input
+              <input aria-label="Target Port"
                 type="number"
+                min={1}
+                max={65535}
                 value={port}
                 onChange={(e) => setPort(Number(e.target.value))}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 font-mono text-xs text-slate-200 focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-xl border border-line bg-inset px-3.5 py-2 font-mono text-xs text-ink focus:border-emerald-line focus-visible:outline-2 focus-visible:outline-focus"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-mono font-semibold text-slate-300 uppercase mb-1.5">
+            <label className="block text-xs font-mono font-semibold text-body uppercase mb-1.5">
               Container Image
             </label>
-            <input
+            <input aria-label="Container Image"
               type="text"
               value={image}
               onChange={(e) => setImage(e.target.value)}
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 font-mono text-xs text-slate-200 focus:border-emerald-500 focus:outline-none"
+              className="w-full rounded-xl border border-line bg-inset px-3.5 py-2 font-mono text-xs text-ink focus:border-emerald-line focus-visible:outline-2 focus-visible:outline-focus"
             />
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-mono text-slate-400 mb-1">Replicas ({replicas})</label>
+              <label className="block text-xs font-mono text-muted mb-1">Replicas ({replicas})</label>
               <input
                 type="range"
+                aria-label="Replicas"
                 min={1}
                 max={10}
                 value={replicas}
@@ -178,30 +187,30 @@ spec:
               />
             </div>
             <div>
-              <label className="block text-xs font-mono text-slate-400 mb-1">CPU Limit</label>
-              <input
+              <label className="block text-xs font-mono text-muted mb-1">CPU Limit</label>
+              <input aria-label="CPU Limit"
                 type="text"
                 value={cpuLimit}
                 onChange={(e) => setCpuLimit(e.target.value)}
-                className="w-full rounded-lg border border-slate-800 bg-slate-950 px-2 py-1 font-mono text-xs text-slate-200"
+                className="w-full rounded-lg border border-line bg-inset px-2 py-1 font-mono text-xs text-ink"
               />
             </div>
             <div>
-              <label className="block text-xs font-mono text-slate-400 mb-1">Memory Limit</label>
-              <input
+              <label className="block text-xs font-mono text-muted mb-1">Memory Limit</label>
+              <input aria-label="Memory Limit"
                 type="text"
                 value={memLimit}
                 onChange={(e) => setMemLimit(e.target.value)}
-                className="w-full rounded-lg border border-slate-800 bg-slate-950 px-2 py-1 font-mono text-xs text-slate-200"
+                className="w-full rounded-lg border border-line bg-inset px-2 py-1 font-mono text-xs text-ink"
               />
             </div>
           </div>
 
           {/* Security Toggles */}
-          <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 space-y-3">
-            <span className="text-xs font-mono font-bold uppercase text-emerald-400 flex items-center gap-1.5">
+          <div className="rounded-xl border border-line bg-inset p-4 space-y-3">
+            <span className="text-xs font-mono font-bold uppercase text-emerald-ink flex items-center gap-1.5">
               <ShieldCheck className="h-4 w-4" />
-              CIS Security & Reliability Hardening
+              Security & Reliability Settings
             </span>
 
             <label className="flex items-center gap-3 cursor-pointer">
@@ -211,9 +220,9 @@ spec:
                 onChange={(e) => setRunAsNonRoot(e.target.checked)}
                 className="rounded accent-emerald-500 h-4 w-4"
               />
-              <span className="text-xs text-slate-200">
+              <span className="text-xs text-ink">
                 <strong>Enforce Non-Root UID (10001)</strong>
-                <span className="block text-[11px] text-slate-500">Prevents host kernel takeover</span>
+                <span className="block text-xs text-muted">Runs the application with an unprivileged user</span>
               </span>
             </label>
 
@@ -224,9 +233,9 @@ spec:
                 onChange={(e) => setReadOnlyRoot(e.target.checked)}
                 className="rounded accent-emerald-500 h-4 w-4"
               />
-              <span className="text-xs text-slate-200">
+              <span className="text-xs text-ink">
                 <strong>Read-Only Root Filesystem + /tmp tmpfs</strong>
-                <span className="block text-[11px] text-slate-500">Blocks in-memory malware write payloads</span>
+                <span className="block text-xs text-muted">Restricts writes to the root filesystem</span>
               </span>
             </label>
 
@@ -237,9 +246,9 @@ spec:
                 onChange={(e) => setDropCaps(e.target.checked)}
                 className="rounded accent-emerald-500 h-4 w-4"
               />
-              <span className="text-xs text-slate-200">
+              <span className="text-xs text-ink">
                 <strong>Drop All Linux Capabilities (ALL)</strong>
-                <span className="block text-[11px] text-slate-500">Disables raw network sockets & root escalation</span>
+                <span className="block text-xs text-muted">Disables raw network sockets & root escalation</span>
               </span>
             </label>
 
@@ -250,29 +259,32 @@ spec:
                 onChange={(e) => setIncludeProbes(e.target.checked)}
                 className="rounded accent-emerald-500 h-4 w-4"
               />
-              <span className="text-xs text-slate-200">
+              <span className="text-xs text-ink">
                 <strong>Liveness & Readiness Health Probes</strong>
-                <span className="block text-[11px] text-slate-500">Ensures zero-downtime rolling updates</span>
+                <span className="block text-xs text-muted">Checks application health and readiness</span>
               </span>
             </label>
           </div>
         </div>
 
         {/* Generated YAML Manifest Output */}
-        <div className="relative rounded-2xl border border-slate-800 bg-slate-950 overflow-hidden flex flex-col">
-          <div className="flex items-center justify-between border-b border-slate-800 bg-slate-900/80 px-4 py-2.5">
-            <span className="font-mono text-xs text-emerald-400 font-bold">
+        <div className="relative rounded-2xl border border-line bg-inset overflow-hidden flex flex-col">
+          <div className="flex items-center justify-between border-b border-line bg-surface px-4 py-2.5">
+            <span className="font-mono text-xs text-emerald-ink font-bold">
               hardened-deployment.yaml
             </span>
             <button
               onClick={handleCopy}
-              className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1 text-xs font-mono text-slate-300 hover:text-white transition-colors"
+              disabled={errors.length > 0}
+              className="flex items-center gap-1.5 rounded-lg border border-line bg-subtle px-3 py-1 text-xs font-mono text-body hover:text-ink disabled:opacity-50 transition-colors"
             >
-              {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? <Check className="h-3.5 w-3.5 text-emerald-ink" /> : <Copy className="h-3.5 w-3.5" />}
               {copied ? 'Copied' : 'Copy Manifest'}
             </button>
           </div>
-          <pre className="p-4 font-mono text-xs text-emerald-300 overflow-x-auto flex-1 leading-relaxed">
+          {errors.length > 0 && <ul role="alert" className="p-4 text-xs text-rose-ink space-y-2">{errors.map((error) => <li key={error}>{error}</li>)}</ul>}
+          {copyError && <p role="alert" className="p-4 text-xs text-rose-ink">{copyError}</p>}
+          <pre className="p-4 font-mono text-xs text-emerald-ink overflow-x-auto flex-1 leading-relaxed">
             {yamlOutput}
           </pre>
         </div>

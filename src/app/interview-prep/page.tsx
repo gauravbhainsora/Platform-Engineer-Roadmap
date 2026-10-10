@@ -1,6 +1,5 @@
-import React from 'react';
-import type { Metadata } from 'next';
 import MockInterview from '@/components/interview/MockInterview';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Platform Engineer Mock Interview Room | Incident Response & System Design',

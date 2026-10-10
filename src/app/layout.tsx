@@ -1,6 +1,7 @@
+import { LayoutWrapper } from '@/components/ui/LayoutWrapper';
+import { THEME_INIT_SCRIPT } from '@/lib/theme';
 import type { Metadata } from 'next';
 import './globals.css';
-import { LayoutWrapper } from '@/components/ui/LayoutWrapper';
 
 export const metadata: Metadata = {
   title: 'Platform Engineer Roadmap | Interactive Study Platform',
@@ -25,7 +26,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script id="theme-init" dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className="antialiased">
         <LayoutWrapper>{children}</LayoutWrapper>
       </body>

@@ -1,25 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import {
-  Clock,
-  Play,
-  RotateCcw,
-  CheckCircle2,
-  AlertTriangle,
-  ChevronRight,
-  ChevronLeft,
-  Award,
-  BookOpen,
-  Sparkles,
-  ShieldAlert,
-  Server,
-  Zap,
-  HelpCircle,
-  FileText,
-  UserCheck
-} from 'lucide-react';
 import { triggerConfetti } from '@/lib/storage';
+import {
+  Award,
+  CheckCircle2,
+  Clock,
+  FileText,
+  HelpCircle,
+  RotateCcw,
+  Server,
+  ShieldAlert,
+  Sparkles,
+  Zap
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface InterviewQuestion {
   id: string;
@@ -219,38 +213,38 @@ export default function MockInterview() {
       selfScore.security +
       selfScore.realism;
     const avg = totalScore / 4;
-    if (avg >= 4.5 && coveragePercent >= 80) return { grade: 'L6 / Principal Level Pass', color: 'text-emerald-400' };
-    if (avg >= 3.8 && coveragePercent >= 60) return { grade: 'L5 / Senior Level Pass', color: 'text-cyan-400' };
-    if (avg >= 3.0) return { grade: 'L4 / Mid-Level Pass', color: 'text-amber-400' };
-    return { grade: 'Needs Revision / Deep Study', color: 'text-rose-400' };
+    if (avg >= 4.5 && coveragePercent >= 80) return { grade: 'L6 / Principal Level Pass', color: 'text-emerald-ink' };
+    if (avg >= 3.8 && coveragePercent >= 60) return { grade: 'L5 / Senior Level Pass', color: 'text-cyan-ink' };
+    if (avg >= 3.0) return { grade: 'L4 / Mid-Level Pass', color: 'text-amber-ink' };
+    return { grade: 'Needs Revision / Deep Study', color: 'text-rose-ink' };
   };
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-800">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-surface via-subtle to-surface border border-line">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+            <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-soft text-emerald-ink border border-emerald-line flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5" />
               SRE & Platform Simulation
             </span>
-            <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+            <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-cyan-soft text-cyan-ink border border-cyan-line">
               Interactive Rubric
             </span>
           </div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">
+          <h1 className="text-3xl font-extrabold text-ink tracking-tight">
             Platform Engineer Mock Interview Room
           </h1>
-          <p className="text-slate-400 text-sm mt-1">
+          <p className="text-muted text-sm mt-1">
             Simulate 45-minute technical bar-raiser scenarios. Formulate architectures, troubleshoot live incidents, and evaluate against staff-engineer rubrics.
           </p>
         </div>
 
         {/* Timer Box */}
-        <div className="flex items-center gap-3 bg-slate-950/80 px-4 py-3 rounded-xl border border-slate-800">
-          <Clock className={`w-5 h-5 ${timeRemaining < 300 ? 'text-rose-400 animate-pulse' : 'text-cyan-400'}`} />
-          <div className="font-mono text-2xl font-bold text-white tracking-widest">
+        <div className="flex items-center gap-3 bg-inset px-4 py-3 rounded-xl border border-line">
+          <Clock className={`w-5 h-5 ${timeRemaining < 300 ? 'text-rose-ink animate-pulse' : 'text-cyan-ink'}`} />
+          <div className="font-mono text-2xl font-bold text-ink tracking-widest">
             {formatTimer(timeRemaining)}
           </div>
           <div className="flex items-center gap-1">
@@ -258,8 +252,8 @@ export default function MockInterview() {
               onClick={() => setIsTimerRunning(!isTimerRunning)}
               className={`p-2 rounded-lg font-medium text-xs transition flex items-center gap-1 ${
                 isTimerRunning
-                  ? 'bg-amber-500/20 text-amber-300 hover:bg-amber-500/30'
-                  : 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30'
+                  ? 'bg-amber-soft text-amber-ink hover:bg-amber-soft'
+                  : 'bg-emerald-soft text-emerald-ink hover:bg-emerald-soft'
               }`}
             >
               {isTimerRunning ? 'Pause' : 'Start'}
@@ -270,7 +264,7 @@ export default function MockInterview() {
                 setIsTimerRunning(false);
               }}
               title="Reset 45m"
-              className="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white transition"
+              className="p-2 rounded-lg bg-subtle text-muted hover:text-ink transition"
             >
               <RotateCcw className="w-4 h-4" />
             </button>
@@ -288,25 +282,25 @@ export default function MockInterview() {
               onClick={() => handleReset(q)}
               className={`text-left p-4 rounded-xl border transition-colors ${
                 isSelected
-                  ? 'bg-slate-800 border-sky-500 shadow-sm'
-                  : 'bg-slate-900/60 border-slate-800 hover:bg-slate-850 hover:border-slate-700'
+                  ? 'bg-subtle border-sky-line shadow-sm'
+                  : 'bg-surface border-line hover:bg-hover hover:border-line'
               }`}
             >
               <div className="flex items-center justify-between text-xs mb-2">
-                <span className="text-slate-400 font-medium">{q.category}</span>
+                <span className="text-muted font-medium">{q.category}</span>
                 <span
-                  className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                  className={`px-1.5 py-0.5 rounded text-xs font-semibold ${
                     q.roleLevel.includes('Principal')
-                      ? 'bg-purple-500/20 text-purple-300'
+                      ? 'bg-purple-soft text-purple-ink'
                       : q.roleLevel.includes('Senior')
-                      ? 'bg-sky-500/20 text-sky-300'
-                      : 'bg-emerald-500/20 text-emerald-300'
+                      ? 'bg-sky-soft text-sky-ink'
+                      : 'bg-emerald-soft text-emerald-ink'
                   }`}
                 >
                   {q.roleLevel}
                 </span>
               </div>
-              <p className="text-sm font-semibold text-white line-clamp-2 leading-snug">
+              <p className="text-sm font-semibold text-ink line-clamp-2 leading-snug">
                 {q.title}
               </p>
             </button>
@@ -319,38 +313,38 @@ export default function MockInterview() {
         {/* Left Side: Question Scenario & Notes */}
         <div className="lg:col-span-7 space-y-6">
           {/* Question Details Card */}
-          <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-5">
+          <div className="p-6 rounded-2xl bg-surface border border-line space-y-5">
             <div className="flex items-center justify-between">
-              <span className="text-xs uppercase tracking-wider font-semibold text-sky-400 flex items-center gap-1.5">
+              <span className="text-xs uppercase tracking-wider font-semibold text-sky-ink flex items-center gap-1.5">
                 <Server className="w-4 h-4" />
                 Interviewer: {selectedQuestion.interviewerPersona}
               </span>
-              <span className="text-xs text-slate-400 font-normal">
+              <span className="text-xs text-muted font-normal">
                 {selectedQuestion.category}
               </span>
             </div>
 
-            <h2 className="text-xl font-bold text-white leading-tight">
+            <h2 className="text-xl font-bold text-ink leading-tight">
               {selectedQuestion.title}
             </h2>
 
-            <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 text-slate-200 text-sm leading-relaxed whitespace-pre-line font-sans">
+            <div className="p-4 rounded-xl bg-inset border border-line text-ink text-sm leading-relaxed whitespace-pre-line font-sans">
               {selectedQuestion.scenario}
             </div>
 
             {/* Follow-up Probes */}
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
-                <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
+              <h4 className="text-xs font-bold uppercase tracking-wider text-muted mb-2 flex items-center gap-1.5">
+                <HelpCircle className="w-3.5 h-3.5 text-amber-ink" />
                 Expected Follow-up Pressure Tests
               </h4>
               <ul className="space-y-1.5">
                 {selectedQuestion.followUpProbes.map((probe, idx) => (
                   <li
                     key={idx}
-                    className="text-xs text-slate-300 flex items-start gap-2 bg-slate-950/40 p-2 rounded-lg border border-slate-800/60"
+                    className="text-xs text-body flex items-start gap-2 bg-inset p-2 rounded-lg border border-line"
                   >
-                    <span className="text-amber-400 font-mono font-bold">Q{idx + 1}:</span>
+                    <span className="text-amber-ink font-mono font-bold">Q{idx + 1}:</span>
                     <span>{probe}</span>
                   </li>
                 ))}
@@ -359,20 +353,20 @@ export default function MockInterview() {
           </div>
 
           {/* Candidate Scratchpad */}
-          <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3">
+          <div className="p-6 rounded-2xl bg-surface border border-line space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-bold text-white flex items-center gap-2">
-                <FileText className="w-4 h-4 text-cyan-400" />
+              <label className="text-sm font-bold text-ink flex items-center gap-2">
+                <FileText className="w-4 h-4 text-cyan-ink" />
                 Your Live Answer & Architecture Scratchpad
               </label>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-muted">
                 Draft your structured response, CLI commands & bullet points
               </span>
             </div>
             <textarea
               value={candidateNotes}
               onChange={(e) => setCandidateNotes(e.target.value)}
-              placeholder="e.g. 
+              placeholder="e.g.
 1. Immediate Triage:
    - Check ingress status and upstream response latency
    - Command: kubectl logs -n ingress-nginx deploy/ingress-nginx-controller
@@ -380,22 +374,22 @@ export default function MockInterview() {
    - Database connection pool starvation or CoreDNS ndots latency
 3. Mitigation & Prevention..."
               rows={8}
-              className="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-4 text-slate-100 placeholder:text-slate-600 font-mono text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              className="w-full bg-inset border border-line rounded-xl p-4 text-ink placeholder:text-muted font-mono text-xs leading-relaxed focus-visible:outline-2 focus-visible:outline-focus focus:ring-2 focus:ring-cyan-500"
             />
           </div>
         </div>
 
         {/* Right Side: Tabbed Evaluation & Model Answer */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-5">
+          <div className="p-6 rounded-2xl bg-surface border border-line space-y-5">
             {/* Tabs */}
-            <div className="flex rounded-xl bg-slate-950 p-1 border border-slate-800">
+            <div className="flex rounded-xl bg-inset p-1 border border-line">
               <button
                 onClick={() => setActiveTab('scenario')}
                 className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${
                   activeTab === 'scenario'
-                    ? 'bg-slate-800 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-subtle text-ink shadow-sm'
+                    : 'text-muted hover:text-ink'
                 }`}
               >
                 Rubric Checklist
@@ -404,8 +398,8 @@ export default function MockInterview() {
                 onClick={() => setActiveTab('answer')}
                 className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${
                   activeTab === 'answer'
-                    ? 'bg-slate-800 text-sky-400 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-subtle text-sky-ink shadow-sm'
+                    : 'text-muted hover:text-ink'
                 }`}
               >
                 Model Answer
@@ -414,8 +408,8 @@ export default function MockInterview() {
                 onClick={() => setActiveTab('evaluation')}
                 className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${
                   activeTab === 'evaluation'
-                    ? 'bg-slate-800 text-emerald-400 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-subtle text-emerald-ink shadow-sm'
+                    : 'text-muted hover:text-ink'
                 }`}
               >
                 Self-Scorecard
@@ -426,15 +420,15 @@ export default function MockInterview() {
             {activeTab === 'scenario' && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-white">Essential Talking Points</h3>
-                  <span className="text-xs font-semibold text-sky-400">
+                  <h3 className="text-sm font-semibold text-ink">Essential Talking Points</h3>
+                  <span className="text-xs font-semibold text-sky-ink">
                     {totalPointsChecked} / {selectedQuestion.keyTalkingPoints.length} ({coveragePercent}%)
                   </span>
                 </div>
 
-                <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                <div className="w-full bg-inset h-2 rounded-full overflow-hidden border border-line">
                   <div
-                    className="bg-sky-500 h-full transition-all duration-300"
+                    className="bg-sky-fill h-full transition-all duration-300"
                     style={{ width: `${coveragePercent}%` }}
                   />
                 </div>
@@ -448,15 +442,15 @@ export default function MockInterview() {
                         onClick={() => handleToggleCheck(point)}
                         className={`flex items-start gap-2.5 p-3 rounded-xl border text-xs cursor-pointer transition ${
                           isChecked
-                            ? 'bg-emerald-950/20 border-emerald-500/40 text-emerald-200'
-                            : 'bg-slate-950/60 border-slate-800/80 text-slate-300 hover:border-slate-700'
+                            ? 'bg-emerald-tint border-emerald-line text-emerald-ink'
+                            : 'bg-inset border-line text-body hover:border-line'
                         }`}
                       >
                         <div
                           className={`w-4 h-4 rounded mt-0.5 flex items-center justify-center border transition ${
                             isChecked
-                              ? 'bg-emerald-500 border-emerald-500 text-slate-950'
-                              : 'border-slate-700 bg-slate-900'
+                              ? 'bg-emerald-fill border-emerald-line text-ink'
+                              : 'border-line bg-surface'
                           }`}
                         >
                           {isChecked && <CheckCircle2 className="w-3.5 h-3.5" />}
@@ -468,14 +462,14 @@ export default function MockInterview() {
                 </div>
 
                 {/* Common Pitfalls / Anti-patterns */}
-                <div className="p-3.5 rounded-xl bg-rose-950/20 border border-rose-500/30">
-                  <h4 className="text-xs font-bold text-rose-300 flex items-center gap-1.5 mb-1.5">
+                <div className="p-3.5 rounded-xl bg-rose-tint border border-rose-line">
+                  <h4 className="text-xs font-bold text-rose-ink flex items-center gap-1.5 mb-1.5">
                     <ShieldAlert className="w-3.5 h-3.5" />
                     Common Rejection Anti-Patterns
                   </h4>
                   <ul className="space-y-1">
                     {selectedQuestion.antiPatterns.map((ap, i) => (
-                      <li key={i} className="text-[11px] text-rose-200/80 list-disc list-inside">
+                      <li key={i} className="text-xs text-rose-ink list-disc list-inside">
                         {ap}
                       </li>
                     ))}
@@ -488,17 +482,17 @@ export default function MockInterview() {
             {activeTab === 'answer' && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-cyan-400" />
+                  <h3 className="text-sm font-bold text-ink flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-cyan-ink" />
                     Staff Engineer Model Solution
                   </h3>
-                  <span className="text-[11px] text-slate-400">Production Tested</span>
+                  <span className="text-xs text-muted">Production Tested</span>
                 </div>
-                <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 font-sans leading-relaxed space-y-3 max-h-[420px] overflow-y-auto pr-1">
+                <div className="p-4 rounded-xl bg-inset border border-line text-xs text-body font-sans leading-relaxed space-y-3 max-h-[420px] overflow-y-auto pr-1">
                   {selectedQuestion.modelAnswer.split('\n\n').map((paragraph, idx) => {
                     if (paragraph.startsWith('###')) {
                       return (
-                        <h4 key={idx} className="font-bold text-cyan-300 text-sm mt-2">
+                        <h4 key={idx} className="font-bold text-cyan-ink text-sm mt-2">
                           {paragraph.replace('### ', '')}
                         </h4>
                       );
@@ -517,13 +511,13 @@ export default function MockInterview() {
             {activeTab === 'evaluation' && (
               <div className="space-y-5">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <Award className="w-4 h-4 text-emerald-400" />
+                  <h3 className="text-sm font-bold text-ink flex items-center gap-2">
+                    <Award className="w-4 h-4 text-emerald-ink" />
                     Interview Rubric Assessment
                   </h3>
                   <button
                     onClick={() => triggerConfetti()}
-                    className="text-xs text-emerald-400 hover:underline flex items-center gap-1"
+                    className="text-xs text-emerald-ink hover:underline flex items-center gap-1"
                   >
                     Calculate Pass
                   </button>
@@ -532,9 +526,9 @@ export default function MockInterview() {
                 {/* Score Sliders */}
                 <div className="space-y-3 text-xs">
                   <div>
-                    <div className="flex justify-between text-slate-300 mb-1">
+                    <div className="flex justify-between text-body mb-1">
                       <span>Architecture Depth (1-5)</span>
-                      <span className="font-bold text-cyan-400">{selfScore.architecture} / 5</span>
+                      <span className="font-bold text-cyan-ink">{selfScore.architecture} / 5</span>
                     </div>
                     <input
                       type="range"
@@ -549,9 +543,9 @@ export default function MockInterview() {
                   </div>
 
                   <div>
-                    <div className="flex justify-between text-slate-300 mb-1">
+                    <div className="flex justify-between text-body mb-1">
                       <span>Incident Troubleshooting Methodology (1-5)</span>
-                      <span className="font-bold text-cyan-400">{selfScore.troubleshooting} / 5</span>
+                      <span className="font-bold text-cyan-ink">{selfScore.troubleshooting} / 5</span>
                     </div>
                     <input
                       type="range"
@@ -566,9 +560,9 @@ export default function MockInterview() {
                   </div>
 
                   <div>
-                    <div className="flex justify-between text-slate-300 mb-1">
+                    <div className="flex justify-between text-body mb-1">
                       <span>Security & Zero-Trust Posture (1-5)</span>
-                      <span className="font-bold text-cyan-400">{selfScore.security} / 5</span>
+                      <span className="font-bold text-cyan-ink">{selfScore.security} / 5</span>
                     </div>
                     <input
                       type="range"
@@ -583,9 +577,9 @@ export default function MockInterview() {
                   </div>
 
                   <div>
-                    <div className="flex justify-between text-slate-300 mb-1">
+                    <div className="flex justify-between text-body mb-1">
                       <span>Production Realism & FinOps (1-5)</span>
-                      <span className="font-bold text-cyan-400">{selfScore.realism} / 5</span>
+                      <span className="font-bold text-cyan-ink">{selfScore.realism} / 5</span>
                     </div>
                     <input
                       type="range"
@@ -601,14 +595,14 @@ export default function MockInterview() {
                 </div>
 
                 {/* Final Verdict Box */}
-                <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-center space-y-1.5">
-                  <span className="text-[11px] uppercase tracking-wider text-slate-400">
+                <div className="p-4 rounded-xl bg-inset border border-line text-center space-y-1.5">
+                  <span className="text-xs uppercase tracking-wider text-muted">
                     Final Calibration Verdict
                   </span>
                   <div className={`text-base font-extrabold ${calculateFinalGrade().color}`}>
                     {calculateFinalGrade().grade}
                   </div>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-xs text-muted">
                     Based on {coveragePercent}% key talking points coverage and rubric average.
                   </p>
                 </div>

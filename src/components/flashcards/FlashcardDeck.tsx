@@ -1,19 +1,18 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { PILLARS } from '@/data';
+import { saveFlashcardReview } from '@/lib/storage';
+import { useProgress } from '@/lib/useProgress';
+import { PillarId } from '@/types';
 import {
-  Sparkles,
-  RotateCw,
-  Check,
-  RotateCcw,
-  BookOpen,
   ArrowLeft,
   ArrowRight,
-  Award,
-  Layers,
+  Check,
+  RotateCcw,
+  RotateCw,
+  Sparkles
 } from 'lucide-react';
-import { PILLARS } from '@/data';
-import { PillarId } from '@/types';
+import { useState } from 'react';
 
 interface FlashcardItem {
   id: string;
@@ -127,11 +126,14 @@ export function FlashcardDeck() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [selectedPillar, setSelectedPillar] = useState<string>('all');
-  const [knownCards, setKnownCards] = useState<Record<string, boolean>>({});
+  const { flashcardReviews = {} } = useProgress();
+  const [dueOnly, setDueOnly] = useState(true);
+  const [reviewTime, setReviewTime] = useState(() => Date.now());
+  const [saveError, setSaveError] = useState('');
 
-  const filteredCards = FLASHCARDS.filter(
-    (c) => selectedPillar === 'all' || c.pillarId === selectedPillar
-  );
+  const pillarCards = FLASHCARDS.filter((card) => selectedPillar === 'all' || card.pillarId === selectedPillar);
+  const filteredCards = pillarCards.filter((card) => !dueOnly || !flashcardReviews[card.id] || Date.parse(flashcardReviews[card.id].due) <= reviewTime)
+    .sort((a, b) => Date.parse(flashcardReviews[a.id]?.due ?? '1970-01-01') - Date.parse(flashcardReviews[b.id]?.due ?? '1970-01-01'));
 
   const currentCard = filteredCards[currentIndex] || filteredCards[0];
 
@@ -147,30 +149,38 @@ export function FlashcardDeck() {
 
   const markKnown = (known: boolean) => {
     if (!currentCard) return;
-    setKnownCards((prev) => ({ ...prev, [currentCard.id]: known }));
-    handleNext();
+    const now = new Date();
+    if (!saveFlashcardReview(currentCard.id, known, now)) { setSaveError('Could not save your review. Browser storage is unavailable or full.'); return; }
+    setSaveError(''); setReviewTime(now.getTime());
+    setIsFlipped(false);
+    if (dueOnly) setCurrentIndex(0); else handleNext();
   };
 
-  const knownCount = Object.values(knownCards).filter(Boolean).length;
+  const knownCount = pillarCards.filter((card) => flashcardReviews[card.id]?.known).length;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="mb-8 text-center">
-        <div className="inline-flex items-center gap-2 rounded-full border border-sky-500/20 bg-sky-500/10 px-3.5 py-1 text-xs font-mono font-semibold text-sky-400 mb-3">
+        <div className="inline-flex items-center gap-2 rounded-full border border-sky-line bg-sky-soft px-3.5 py-1 text-xs font-mono font-semibold text-sky-ink mb-3">
           <Sparkles className="h-3.5 w-3.5" />
           Spaced Repetition & Rapid Revision
         </div>
-        <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+        <h1 className="text-2xl sm:text-4xl font-extrabold text-ink tracking-tight">
           Platform Engineer Interview Flashcards
         </h1>
-        <p className="mt-2 text-sm text-slate-400">
+        <p className="mt-2 text-sm text-muted">
           Flip cards to test core technical mental models before interviews and production on-call shifts.
         </p>
       </div>
 
+      {saveError && <p role="alert" className="text-sm text-rose-ink">{saveError}</p>}
+      <div className="flex gap-2 mb-4">
+        <button aria-pressed={dueOnly} onClick={() => { setDueOnly(true); setCurrentIndex(0); setIsFlipped(false); setReviewTime(Date.now()); }} className="rounded-lg border border-line px-3 py-2 text-sm">Due for review</button>
+        <button aria-pressed={!dueOnly} onClick={() => { setDueOnly(false); setCurrentIndex(0); setIsFlipped(false); }} className="rounded-lg border border-line px-3 py-2 text-sm">Browse all cards</button>
+      </div>
       {/* Filter and Stats */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 rounded-2xl border border-slate-800 bg-slate-900/80 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 rounded-2xl border border-line bg-surface p-4">
         <div className="flex flex-wrap gap-1.5">
           <button
             onClick={() => {
@@ -180,8 +190,8 @@ export function FlashcardDeck() {
             }}
             className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
               selectedPillar === 'all'
-                ? 'bg-sky-500 text-slate-950 font-bold'
-                : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                ? 'bg-sky-fill text-ink font-bold'
+                : 'bg-inset text-muted hover:text-ink border border-line'
             }`}
           >
             All Pillars ({FLASHCARDS.length})
@@ -196,8 +206,8 @@ export function FlashcardDeck() {
               }}
               className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
                 selectedPillar === p.id
-                  ? 'bg-sky-500 text-slate-950 font-bold'
-                  : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                  ? 'bg-sky-fill text-ink font-bold'
+                  : 'bg-inset text-muted hover:text-ink border border-line'
               }`}
             >
               {p.name}
@@ -205,36 +215,43 @@ export function FlashcardDeck() {
           ))}
         </div>
 
-        <div className="text-xs text-slate-400 flex items-center gap-2">
-          <span>Card {currentIndex + 1} of {filteredCards.length}</span>
+        <div className="text-xs text-muted flex items-center gap-2">
+          <span>Card {filteredCards.length ? Math.min(currentIndex + 1, filteredCards.length) : 0} of {filteredCards.length}</span>
           <span>•</span>
-          <span className="text-emerald-400 font-semibold">{knownCount} Mastered</span>
+          <span className="text-emerald-ink font-semibold">{knownCount} Mastered</span>
         </div>
       </div>
 
+      {!currentCard && <p role="status" className="rounded-xl border border-line p-6 text-body">You are caught up. Return later for scheduled reviews, or browse all cards.</p>}
+      <p className="text-xs text-muted">Known cards return after 1, 3, 7, 14, then 30 days. Cards needing review return in 10 minutes.</p>
       {/* Clean Flippable Card Box */}
       {currentCard && (
         <div className="relative my-6">
           <div
+            role="button"
+            tabIndex={0}
+            aria-label={isFlipped ? 'Show flashcard question' : 'Show flashcard answer'}
+            aria-pressed={isFlipped}
+            onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setIsFlipped((flipped) => !flipped); } }}
             onClick={() => setIsFlipped(!isFlipped)}
             className={`relative min-h-[340px] w-full rounded-2xl border cursor-pointer p-8 sm:p-10 shadow-md transition-colors flex flex-col justify-between select-none ${
               isFlipped
-                ? 'border-sky-500/30 bg-slate-900 text-slate-100'
-                : 'border-slate-800 bg-slate-900/90 text-white hover:border-slate-700'
+                ? 'border-sky-line bg-surface text-ink'
+                : 'border-line bg-surface text-ink hover:border-line'
             }`}
           >
             {/* Card Header */}
-            <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
+            <div className="flex items-center justify-between border-b border-line pb-4">
               <div className="flex items-center gap-2">
-                <span className="rounded-md bg-slate-800 px-2.5 py-1 text-xs font-semibold uppercase text-sky-400 border border-slate-700">
+                <span className="rounded-md bg-subtle px-2.5 py-1 text-xs font-semibold uppercase text-sky-ink border border-line">
                   {currentCard.pillarId}
                 </span>
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-muted">
                   {currentCard.category}
                 </span>
               </div>
-              <span className="text-xs text-slate-400 flex items-center gap-1.5">
-                <RotateCw className="h-3.5 w-3.5 text-slate-400" />
+              <span className="text-xs text-muted flex items-center gap-1.5">
+                <RotateCw className="h-3.5 w-3.5 text-muted" />
                 Click to flip
               </span>
             </div>
@@ -243,30 +260,30 @@ export function FlashcardDeck() {
             <div className="my-6">
               {!isFlipped ? (
                 <div>
-                  <span className="text-xs font-semibold uppercase text-slate-400 block mb-2">
+                  <span className="text-xs font-semibold uppercase text-muted block mb-2">
                     Question / Scenario
                   </span>
-                  <h3 className="text-xl sm:text-2xl font-bold text-white leading-relaxed">
+                  <h3 className="text-xl sm:text-2xl font-bold text-ink leading-relaxed">
                     {currentCard.question}
                   </h3>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <span className="text-xs font-semibold uppercase text-emerald-400 block">
+                  <span className="text-xs font-semibold uppercase text-emerald-ink block">
                     Key Architectural Answer
                   </span>
-                  <p className="text-base text-slate-200 leading-relaxed font-normal">
+                  <p className="text-base text-ink leading-relaxed font-normal">
                     {currentCard.answer}
                   </p>
-                  <div className="rounded-xl border border-sky-900/40 bg-sky-950/20 p-3.5 text-xs sm:text-sm text-slate-300">
-                    💡 <strong className="text-white font-semibold">Pro Tip:</strong> {currentCard.tip}
+                  <div className="rounded-xl border border-sky-line bg-sky-tint p-3.5 text-xs sm:text-sm text-body">
+                    💡 <strong className="text-ink font-semibold">Pro Tip:</strong> {currentCard.tip}
                   </div>
                 </div>
               )}
             </div>
 
             {/* Card Footer Hint */}
-            <div className="text-xs text-slate-400 border-t border-slate-800/80 pt-3 flex items-center justify-between">
+            <div className="text-xs text-muted border-t border-line pt-3 flex items-center justify-between">
               <span>{isFlipped ? 'Showing Answer' : 'Showing Question'}</span>
               <span>Use arrows or buttons below to score</span>
             </div>
@@ -278,7 +295,8 @@ export function FlashcardDeck() {
       <div className="flex flex-wrap items-center justify-between gap-4 mt-6">
         <button
           onClick={handlePrev}
-          className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+          disabled={!currentCard}
+          className="flex items-center gap-2 rounded-xl border border-line bg-surface px-4 py-2.5 text-xs sm:text-sm font-semibold text-body hover:text-ink hover:bg-subtle transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Previous
@@ -287,14 +305,16 @@ export function FlashcardDeck() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => markKnown(false)}
-            className="flex items-center gap-1.5 rounded-xl border border-rose-900/40 bg-rose-950/20 px-4 py-2.5 text-xs sm:text-sm font-bold text-rose-300 hover:bg-rose-950/40 transition-colors"
+            disabled={!currentCard}
+            className="flex items-center gap-1.5 rounded-xl border border-rose-line bg-rose-tint px-4 py-2.5 text-xs sm:text-sm font-bold text-rose-ink hover:bg-rose-tint transition-colors"
           >
             <RotateCcw className="h-4 w-4" />
             Needs Review
           </button>
           <button
             onClick={() => markKnown(true)}
-            className="flex items-center gap-1.5 rounded-xl border border-emerald-900/40 bg-emerald-950/20 px-5 py-2.5 text-xs sm:text-sm font-bold text-emerald-300 hover:bg-emerald-950/40 transition-colors"
+            disabled={!currentCard}
+            className="flex items-center gap-1.5 rounded-xl border border-emerald-line bg-emerald-tint px-5 py-2.5 text-xs sm:text-sm font-bold text-emerald-ink hover:bg-emerald-tint transition-colors"
           >
             <Check className="h-4 w-4" />
             I Know This ✓
@@ -303,7 +323,8 @@ export function FlashcardDeck() {
 
         <button
           onClick={handleNext}
-          className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+          disabled={!currentCard}
+          className="flex items-center gap-2 rounded-xl border border-line bg-surface px-4 py-2.5 text-xs sm:text-sm font-semibold text-body hover:text-ink hover:bg-subtle transition-colors"
         >
           Next
           <ArrowRight className="h-4 w-4" />

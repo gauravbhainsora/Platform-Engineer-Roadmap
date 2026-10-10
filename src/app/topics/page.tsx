@@ -1,4 +1,3 @@
-import React from 'react';
 import { CurriculumList } from '@/components/roadmap/CurriculumList';
 
 export const metadata = {

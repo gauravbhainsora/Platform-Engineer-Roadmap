@@ -1,28 +1,29 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { ALL_TOPICS } from '@/data';
+import { useProgress } from '@/lib/useProgress';
+import {
+  Award,
+  BookOpen,
+  Box,
+  CheckCircle2,
+  Compass,
+  Database,
+  Layers,
+  Menu,
+  Search,
+  Server,
+  ShieldCheck,
+  Sparkles,
+  Terminal,
+  Wrench,
+  X,
+} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  Compass,
-  BookOpen,
-  Terminal,
-  Award,
-  Search,
-  CheckCircle2,
-  Layers,
-  Wrench,
-  Sparkles,
-  Server,
-  Database,
-  Menu,
-  X,
-  ShieldCheck,
-  Box,
-} from 'lucide-react';
-import { getStoredProgress } from '@/lib/storage';
-import { ALL_TOPICS } from '@/data';
+import { useState } from 'react';
 import BackupSyncModal from './BackupSyncModal';
+import { ThemeToggle } from './ThemeToggle';
 
 interface NavbarProps {
   onOpenSearch?: () => void;
@@ -30,22 +31,11 @@ interface NavbarProps {
 
 export function Navbar({ onOpenSearch }: NavbarProps) {
   const pathname = usePathname();
-  const [completedCount, setCompletedCount] = useState(0);
+  const progress = useProgress();
+  const completedCount = ALL_TOPICS.filter((topic) => progress.completedTopics[topic.id]).length;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const totalCount = ALL_TOPICS.length;
-
-  useEffect(() => {
-    const updateStats = () => {
-      const progress = getStoredProgress();
-      const count = Object.values(progress.completedTopics).filter(Boolean).length;
-      setCompletedCount(count);
-    };
-
-    updateStats();
-    window.addEventListener('platform-roadmap-progress-updated', updateStats);
-    return () => window.removeEventListener('platform-roadmap-progress-updated', updateStats);
-  }, []);
 
   const percentage = Math.round((completedCount / totalCount) * 100);
 
@@ -63,65 +53,43 @@ export function Navbar({ onOpenSearch }: NavbarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b border-slate-800 bg-slate-950/85 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <header className="sticky top-0 z-40 w-full border-b border-line bg-inset backdrop-blur-md print:hidden">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-4 sm:px-6 lg:px-8">
           {/* Brand */}
-          <div className="flex items-center gap-4 lg:gap-6">
-            <Link href="/" className="group flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-500 text-slate-950 font-bold shadow-sm transition-transform group-hover:scale-105">
+          <div className="flex min-w-0 items-center gap-4 lg:gap-6">
+            <Link href="/" className="group flex items-center gap-1 sm:gap-3">
+              <div className="flex h-8 w-8 shrink-0 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-sky-fill text-ink font-bold shadow-sm transition-transform group-hover:scale-105">
                 <Layers className="h-5 w-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-bold tracking-tight text-white text-base sm:text-lg">
+                  <span className="font-bold leading-tight tracking-tight text-ink text-xs sm:text-lg">
                     Platform Engineer
                   </span>
-                  <span className="rounded bg-slate-800 px-1.5 py-0.5 text-[10px] font-semibold text-slate-300 border border-slate-700">
+                  <span className="hidden sm:inline rounded bg-subtle px-1.5 py-0.5 text-xs font-semibold text-body border border-line">
                     ROADMAP
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 font-normal hidden xl:block">
+                <p className="text-xs text-muted font-normal hidden xl:block">
                   8 Pillars • {totalCount} Topics
                 </p>
               </div>
             </Link>
 
-            {/* Desktop Navigation Links */}
-            <nav className="hidden xl:flex items-center gap-1 text-xs font-medium">
-              {navLinks.map((item) => {
-                const Icon = item.icon;
-                const isActive =
-                  item.href === '/'
-                    ? pathname === '/'
-                    : pathname.startsWith(item.href);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
-                      isActive
-                        ? 'bg-slate-800 text-white font-semibold'
-                        : 'text-slate-300 hover:bg-slate-850 hover:text-white'
-                    }`}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
           </div>
 
           {/* Right Action Tools */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-3">
+            <ThemeToggle />
             {/* Quick Search */}
             <button
               onClick={onOpenSearch}
-              className="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/90 px-2.5 py-1.5 text-xs text-slate-400 hover:border-slate-700 hover:text-slate-200 transition-colors"
+              aria-label="Search topics"
+              className="flex items-center gap-2 rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs text-muted hover:border-line hover:text-ink transition-colors"
             >
-              <Search className="h-3.5 w-3.5 text-slate-400" />
+              <Search className="h-3.5 w-3.5 text-muted" />
               <span className="hidden md:inline">Search...</span>
-              <kbd className="hidden rounded bg-slate-800 px-1.5 py-0.5 text-[10px] text-slate-400 sm:inline font-mono">
+              <kbd className="hidden sm:inline rounded bg-subtle px-1.5 py-0.5 text-xs text-muted font-mono">
                 ⌘K
               </kbd>
             </button>
@@ -130,27 +98,27 @@ export function Navbar({ onOpenSearch }: NavbarProps) {
             <button
               onClick={() => setIsBackupModalOpen(true)}
               title="Backup, Sync & Data Migration"
-              className="flex items-center gap-1.5 rounded-lg border border-slate-800 bg-slate-900/90 px-2.5 py-1.5 text-xs text-slate-300 hover:border-cyan-500/50 hover:text-cyan-400 transition-colors"
+              className="flex items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs text-body hover:border-cyan-line hover:text-cyan-ink transition-colors"
             >
-              <Database className="h-3.5 w-3.5 text-cyan-400" />
+              <Database className="h-3.5 w-3.5 text-cyan-ink" />
               <span className="hidden lg:inline font-medium">Sync</span>
             </button>
 
             {/* Progress Tracker Pill */}
-            <div className="hidden sm:flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900/90 px-3 py-1">
-              <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-400">
+            <div className="hidden sm:flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-ink">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 <span>
                   {completedCount}/{totalCount}
                 </span>
               </div>
-              <div className="h-1.5 w-12 overflow-hidden rounded-full bg-slate-800">
+              <div className="h-1.5 w-12 overflow-hidden rounded-full bg-subtle">
                 <div
-                  className="h-full bg-gradient-to-r from-sky-400 to-emerald-400 transition-all duration-500"
+                  className="h-full bg-gradient-to-r from-sky-fill to-emerald-fill transition-all duration-500"
                   style={{ width: `${percentage}%` }}
                 />
               </div>
-              <span className="text-[11px] font-semibold text-slate-400">
+              <span className="text-xs font-semibold text-muted">
                 {percentage}%
               </span>
             </div>
@@ -161,7 +129,7 @@ export function Navbar({ onOpenSearch }: NavbarProps) {
               target="_blank"
               rel="noopener noreferrer"
               title="View on GitHub"
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700 hover:text-white transition-colors"
+              className="hidden sm:flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-surface text-body hover:border-line hover:text-ink transition-colors"
             >
               <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
                 <path
@@ -175,16 +143,43 @@ export function Navbar({ onOpenSearch }: NavbarProps) {
             {/* Mobile / Tablet Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="xl:hidden flex h-9 w-9 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-slate-300 hover:text-white"
+              aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={mobileMenuOpen}
+              className="xl:hidden flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-surface text-body hover:text-ink"
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
 
+            {/* Desktop Navigation Links */}
+            <nav aria-label="Main navigation" className="hidden xl:flex mx-auto max-w-7xl flex-wrap items-center gap-1 px-4 sm:px-6 lg:px-8 pb-3 text-sm font-medium">
+              {navLinks.map((item) => {
+                const Icon = item.icon;
+                const isActive =
+                  item.href === '/'
+                    ? pathname === '/'
+                    : pathname.startsWith(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap ${
+                      isActive
+                        ? 'bg-subtle text-ink font-semibold'
+                        : 'text-body hover:bg-hover hover:text-ink'
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+
         {/* Mobile / Tablet Slide-out Drawer */}
         {mobileMenuOpen && (
-          <div className="xl:hidden border-t border-slate-800 bg-slate-950 px-4 py-3 space-y-1">
+          <div className="xl:hidden border-t border-line bg-inset px-4 py-3 space-y-1">
             <div className="grid grid-cols-2 gap-2 pb-2">
               {navLinks.map((item) => {
                 const Icon = item.icon;
@@ -199,8 +194,8 @@ export function Navbar({ onOpenSearch }: NavbarProps) {
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center gap-2 p-2.5 rounded-xl text-xs font-semibold transition ${
                       isActive
-                        ? 'bg-slate-800 text-sky-400'
-                        : 'text-slate-300 hover:bg-slate-900'
+                        ? 'bg-subtle text-sky-ink'
+                        : 'text-body hover:bg-surface'
                     }`}
                   >
                     <Icon className="h-4 w-4" />
@@ -210,14 +205,14 @@ export function Navbar({ onOpenSearch }: NavbarProps) {
               })}
             </div>
 
-            <div className="pt-2 border-t border-slate-900 flex items-center justify-between text-xs text-slate-400 px-1">
+            <div className="pt-2 border-t border-line flex items-center justify-between text-xs text-muted px-1">
               <span>Progress: {completedCount}/{totalCount} ({percentage}%)</span>
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
                   setIsBackupModalOpen(true);
                 }}
-                className="text-cyan-400 hover:underline flex items-center gap-1 font-medium"
+                className="text-cyan-ink hover:underline flex items-center gap-1 font-medium"
               >
                 <Database className="h-3 w-3" />
                 Backup & Sync
@@ -228,10 +223,10 @@ export function Navbar({ onOpenSearch }: NavbarProps) {
       </header>
 
       {/* Backup and Sync Modal */}
-      <BackupSyncModal
+      {isBackupModalOpen && <BackupSyncModal
         isOpen={isBackupModalOpen}
         onClose={() => setIsBackupModalOpen(false)}
-      />
+      />}
     </>
   );
 }

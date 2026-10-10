@@ -81,7 +81,7 @@ The curriculum is structured around the **8 foundational pillars** of modern Clo
    - Click any node for an instant quick preview or jump straight into the full guide.
    - Filter by completed status, bookmarked topics, or search keywords.
 
-2. **67 In-Depth Production Study Guides**
+2. **73 In-Depth Production Study Guides**
    - Scraped and curated from highest-rated authoritative engineering sources: *Linux Foundation, Cloudflare Learning, RFCs, Docker Docs, Kubernetes.io, AWS Architecture Center, Martin Fowler, and Google SRE*.
    - Each guide features:
      - Architecture & Conceptual Deep-Dive
@@ -158,7 +158,7 @@ Platform-Engineer-Roadmap/
 │   ├── gen_cloud.py          # Data generator for 8 Cloud topics
 │   ├── gen_cicd.py           # Data generator for 9 CI/CD topics
 │   ├── gen_iac.py            # Data generator for 7 IaC topics
-│   └── gen_observability.py  # Data generator for 7 Observability topics
+│   └── gen_observability.py  # Data generator for 8 Observability topics
 ├── src/
 │   ├── app/
 │   │   ├── cheatsheet/       # CLI Cheat Sheet page
@@ -176,7 +176,7 @@ Platform-Engineer-Roadmap/
 │   ├── data/
 │   │   ├── cheatsheets.ts    # 100+ production CLI commands
 │   │   ├── pillars.ts        # Metadata for 8 pillars
-│   │   ├── topics/           # 67 comprehensive topic data files
+│   │   ├── topics/           # 73 comprehensive topic data files
 │   │   └── index.ts          # Central data aggregator & lookups
 │   ├── lib/
 │   │   └── storage.ts        # LocalStorage persistence & Confetti
@@ -187,6 +187,27 @@ Platform-Engineer-Roadmap/
 ```
 
 ---
+
+## Progress, certificates, and validation
+
+Study progress, notes, quiz scores, and flashcard review schedules stay in your browser. Use **Sync → Export Backup** to keep a portable JSON copy. Restoring a validated backup replaces these fields; selecting a file only loads it for review until you choose **Restore Progress**. Lab completion is stored separately.
+
+Flashcards schedule known cards for review after 1, 3, 7, 14, and 30 days. Cards marked **Needs Review** return after 10 minutes. Use **Browse all cards** for unscheduled practice.
+
+Certificates are self-reported completion records. Printing requires every curriculum topic to be completed and a name to be entered. The **Preview 100%** view is watermarked and cannot issue a completion record. Certificates do not provide external verification or cryptographic certification.
+
+Kubernetes labs parse YAML and check the pod's configuration. Dockerfile and Terraform labs use text checks on active, uncommented code. These exercises do not run containers, apply infrastructure, or guarantee that a configuration will work in production.
+
+Run the checks locally:
+
+```bash
+pnpm lint
+pnpm exec tsc --noEmit
+pnpm test
+pnpm build
+```
+
+GitHub Actions runs linting, regression tests, and the production build on pushes and pull requests.
 
 ## 📜 License
 

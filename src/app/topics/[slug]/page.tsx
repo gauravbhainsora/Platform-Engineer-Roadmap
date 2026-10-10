@@ -1,7 +1,6 @@
-import React from 'react';
-import { notFound } from 'next/navigation';
-import { getTopicBySlug, ALL_TOPICS } from '@/data';
 import { TopicReader } from '@/components/guide/TopicReader';
+import { ALL_TOPICS, getTopicBySlug } from '@/data';
+import { notFound } from 'next/navigation';
 
 export async function generateStaticParams() {
   return ALL_TOPICS.map((topic) => ({

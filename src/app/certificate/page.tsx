@@ -1,11 +1,10 @@
-import React from 'react';
-import type { Metadata } from 'next';
 import CertificateGenerator from '@/components/certificate/CertificateGenerator';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Certified Platform Engineer | Verifiable Milestones & Certificate',
+  title: 'Platform Engineer | Milestones & Completion Certificate',
   description:
-    'Generate and print your verified Certified Platform Engineer (CPE) completion certificate and track pillar milestone badges.',
+    'Track milestones and print a self-reported completion certificate after finishing the curriculum.',
 };
 
 export default function CertificatePage() {

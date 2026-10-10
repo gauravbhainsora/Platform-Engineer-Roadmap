@@ -104,6 +104,7 @@ export interface UserProgressState {
   bookmarkedTopics: Record<string, boolean>;
   notes: Record<string, string>;
   quizScores: Record<string, { score: number; total: number; date: string }>;
+  flashcardReviews?: Record<string, { known: boolean; streak: number; due: string; lastReviewed: string }>;
   theme: 'dark' | 'light';
   hasCelebrated100?: boolean;
 }

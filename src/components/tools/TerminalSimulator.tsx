@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Terminal as TerminalIcon, Play, RotateCcw, Copy, Check } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface TerminalLine {
   id: string;
@@ -199,12 +199,12 @@ export function TerminalSimulator() {
 
     // Append input line
     const inputLine: TerminalLine = {
-      id: `in-${Date.now()}`,
+      id: `in-${crypto.randomUUID()}`,
       type: 'input',
       text: cmd,
     };
 
-    let newLines = [...lines, inputLine];
+    const newLines = [...lines, inputLine];
 
     if (cmd === 'clear') {
       setLines([]);
@@ -214,26 +214,26 @@ export function TerminalSimulator() {
 
     if (cmd.startsWith('echo ')) {
       newLines.push({
-        id: `out-${Date.now()}`,
+        id: `out-${crypto.randomUUID()}`,
         type: 'output',
         text: cmd.slice(5).replace(/^["']|["']$/g, ''),
       });
     } else if (cmd === 'history') {
       const historyList = history.map((h, i) => `  ${i + 1}  ${h}`).join('\n');
       newLines.push({
-        id: `out-${Date.now()}`,
+        id: `out-${crypto.randomUUID()}`,
         type: 'output',
         text: historyList || 'No command history recorded yet.',
       });
     } else if (COMMAND_RESPONSES[cmd]) {
       newLines.push({
-        id: `out-${Date.now()}`,
+        id: `out-${crypto.randomUUID()}`,
         type: 'output',
         text: COMMAND_RESPONSES[cmd],
       });
     } else {
       newLines.push({
-        id: `err-${Date.now()}`,
+        id: `err-${crypto.randomUUID()}`,
         type: 'error',
         text: `bash: ${cmd.split(' ')[0]}: command not found in simulation sandbox. Type 'help' for supported commands.`,
       });
@@ -269,21 +269,21 @@ export function TerminalSimulator() {
   };
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl overflow-hidden">
+    <div className="rounded-2xl border border-neutral-700 bg-neutral-950 shadow-lg overflow-hidden">
       {/* Window Title Bar */}
-      <div className="flex items-center justify-between border-b border-slate-800 bg-slate-900/90 px-4 py-3">
+      <div className="flex items-center justify-between border-b border-neutral-700 bg-neutral-900/90 px-4 py-3">
         <div className="flex items-center gap-2">
           <div className="h-3 w-3 rounded-full bg-rose-500/80" />
           <div className="h-3 w-3 rounded-full bg-amber-500/80" />
           <div className="h-3 w-3 rounded-full bg-emerald-500/80" />
-          <span className="ml-2 font-mono text-xs text-slate-400">
+          <span className="ml-2 font-mono text-xs text-neutral-300">
             platform-node-01: ~ (bash 5.2)
           </span>
         </div>
         <button
           onClick={() => setLines([])}
           title="Clear screen"
-          className="flex items-center gap-1 rounded bg-slate-800 px-2 py-0.5 text-[10px] font-mono text-slate-400 hover:text-white"
+          className="flex items-center gap-1 rounded bg-neutral-800 px-2 py-0.5 text-xs font-mono text-neutral-300 hover:text-white"
         >
           <RotateCcw className="h-3 w-3" />
           Clear
@@ -291,15 +291,15 @@ export function TerminalSimulator() {
       </div>
 
       {/* Suggestion Chips */}
-      <div className="flex flex-wrap items-center gap-1.5 border-b border-slate-800/80 bg-slate-900/40 p-2.5">
-        <span className="text-[10px] font-mono font-bold uppercase text-slate-500 mr-1">
+      <div className="flex flex-wrap items-center gap-1.5 border-b border-neutral-700/80 bg-neutral-900/40 p-2.5">
+        <span className="text-xs font-mono font-bold uppercase text-neutral-400 mr-1">
           Quick Run:
         </span>
         {SUGGESTIONS.map((cmd) => (
           <button
             key={cmd}
             onClick={() => executeCommand(cmd)}
-            className="rounded-md border border-slate-800 bg-slate-950 px-2 py-0.5 font-mono text-[11px] text-sky-400 hover:border-sky-500 hover:bg-slate-900 transition-colors"
+            className="rounded-md border border-neutral-700 bg-neutral-950 px-2 py-0.5 font-mono text-xs text-sky-200 hover:border-sky-500 hover:bg-neutral-900 transition-colors"
           >
             {cmd}
           </button>
@@ -309,27 +309,27 @@ export function TerminalSimulator() {
       {/* Terminal Output Area */}
       <div
         onClick={() => inputRef.current?.focus()}
-        className="h-[460px] overflow-y-auto p-4 font-mono text-xs sm:text-sm leading-relaxed text-slate-200"
+        className="h-[460px] overflow-y-auto p-4 font-mono text-xs sm:text-sm leading-relaxed text-neutral-200"
       >
         {lines.map((line) => (
           <div key={line.id} className="mb-2">
             {line.type === 'input' ? (
-              <div className="flex items-center gap-2 text-sky-400 font-semibold">
-                <span className="text-emerald-400 font-bold">guest@platform-node:~$</span>
+              <div className="flex items-center gap-2 text-sky-200 font-semibold">
+                <span className="text-emerald-200 font-bold">guest@platform-node:~$</span>
                 <span className="text-white">{line.text}</span>
               </div>
             ) : line.type === 'error' ? (
-              <div className="text-rose-400 whitespace-pre-wrap">{line.text}</div>
+              <div className="text-rose-200 whitespace-pre-wrap">{line.text}</div>
             ) : (
-              <div className="text-slate-300 whitespace-pre-wrap">{line.text}</div>
+              <div className="text-neutral-200 whitespace-pre-wrap">{line.text}</div>
             )}
           </div>
         ))}
 
         {/* Input prompt */}
-        <div className="flex items-center gap-2 text-sky-400 mt-2">
-          <span className="text-emerald-400 font-bold shrink-0">guest@platform-node:~$</span>
-          <input
+        <div className="flex items-center gap-2 text-sky-200 mt-2">
+          <span className="text-emerald-200 font-bold shrink-0">guest@platform-node:~$</span>
+          <input aria-label="Terminal command"
             ref={inputRef}
             type="text"
             value={inputVal}

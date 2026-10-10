@@ -1,4 +1,3 @@
-import React from 'react';
 import { CheatSheetView } from '@/components/cheatsheet/CheatSheetView';
 
 export const metadata = {

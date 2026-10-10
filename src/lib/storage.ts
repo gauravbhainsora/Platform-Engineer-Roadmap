@@ -2,41 +2,34 @@
 
 import confetti from 'canvas-confetti';
 import { UserProgressState } from '@/types';
+import { createDefaultProgress, recoverStoredProgress, STORAGE_KEY, validateProgress } from './progress';
 
-const STORAGE_KEY = 'platform_engineer_roadmap_progress_v1';
-
-const DEFAULT_STATE: UserProgressState = {
-  completedTopics: {},
-  bookmarkedTopics: {},
-  notes: {},
-  quizScores: {},
-  theme: 'dark',
-  hasCelebrated100: false,
-};
+export { STORAGE_KEY } from './progress';
+export const PROGRESS_EVENT = 'platform-roadmap-progress-updated';
 
 export function getStoredProgress(): UserProgressState {
-  if (typeof window === 'undefined') return DEFAULT_STATE;
+  if (typeof window === 'undefined') return createDefaultProgress();
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return DEFAULT_STATE;
+    if (!raw) return createDefaultProgress();
     const parsed = JSON.parse(raw);
-    return {
-      ...DEFAULT_STATE,
-      ...parsed,
-    };
+    return recoverStoredProgress(parsed);
   } catch (e) {
     console.error('Failed to parse progress from localStorage', e);
-    return DEFAULT_STATE;
+    return createDefaultProgress();
   }
 }
 
-export function saveProgress(state: UserProgressState) {
-  if (typeof window === 'undefined') return;
+export function saveProgress(state: UserProgressState): boolean {
+  if (typeof window === 'undefined') return false;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    window.dispatchEvent(new CustomEvent('platform-roadmap-progress-updated', { detail: state }));
+    const validated = validateProgress(state);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(validated));
+    window.dispatchEvent(new CustomEvent(PROGRESS_EVENT, { detail: validated }));
+    return true;
   } catch (e) {
     console.error('Failed to save progress to localStorage', e);
+    return false;
   }
 }
 
@@ -45,11 +38,11 @@ export function toggleTopicCompletion(topicId: string): boolean {
   const isCompleted = !current.completedTopics[topicId];
   current.completedTopics[topicId] = isCompleted;
 
+  if (!saveProgress(current)) return !isCompleted;
   if (isCompleted) {
     triggerMiniConfetti();
   }
 
-  saveProgress(current);
   return isCompleted;
 }
 
@@ -57,8 +50,7 @@ export function toggleTopicBookmark(topicId: string): boolean {
   const current = getStoredProgress();
   const isBookmarked = !current.bookmarkedTopics[topicId];
   current.bookmarkedTopics[topicId] = isBookmarked;
-  saveProgress(current);
-  return isBookmarked;
+  return saveProgress(current) ? isBookmarked : !isBookmarked;
 }
 
 export function saveTopicNote(topicId: string, noteContent: string) {
@@ -68,10 +60,11 @@ export function saveTopicNote(topicId: string, noteContent: string) {
   } else {
     current.notes[topicId] = noteContent;
   }
-  saveProgress(current);
+  return saveProgress(current);
 }
 
 export function saveQuizScore(topicOrPillarId: string, score: number, total: number) {
+  if (!Number.isInteger(score) || !Number.isInteger(total) || total <= 0 || score < 0 || score > total) return false;
   const current = getStoredProgress();
   current.quizScores[topicOrPillarId] = {
     score,
@@ -79,13 +72,25 @@ export function saveQuizScore(topicOrPillarId: string, score: number, total: num
     date: new Date().toISOString(),
   };
 
+  if (!saveProgress(current)) return false;
   if (score === total) {
     triggerCelebrationConfetti();
   } else if (score >= total * 0.7) {
     triggerMiniConfetti();
   }
 
-  saveProgress(current);
+  return true;
+}
+
+export function saveFlashcardReview(cardId: string, known: boolean, now = new Date()) {
+  const progress = getStoredProgress();
+  const reviews = progress.flashcardReviews ?? {};
+  const streak = known ? Math.min((reviews[cardId]?.streak ?? 0) + 1, 5) : 0;
+  const delay = known ? [1, 3, 7, 14, 30][streak - 1] * 86400000 : 10 * 60000;
+  progress.flashcardReviews = { ...reviews, [cardId]: {
+    known, streak, lastReviewed: now.toISOString(), due: new Date(now.getTime() + delay).toISOString(),
+  } };
+  return saveProgress(progress);
 }
 
 export function triggerMiniConfetti() {
@@ -97,7 +102,7 @@ export function triggerMiniConfetti() {
       origin: { y: 0.8 },
       colors: ['#38bdf8', '#34d399', '#c084fc', '#fbbf24'],
     });
-  } catch (e) {
+  } catch {
     // Ignore in non-browser
   }
 }
@@ -128,7 +133,7 @@ export function triggerCelebrationConfetti() {
         requestAnimationFrame(frame);
       }
     })();
-  } catch (e) {
+  } catch {
     // Ignore in non-browser
   }
 }

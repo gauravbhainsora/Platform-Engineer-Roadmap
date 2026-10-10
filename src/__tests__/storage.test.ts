@@ -34,27 +34,8 @@ describe('Storage Helpers & State Management', () => {
       }),
     };
 
-    // Ensure window exists in node environment
-    if (typeof (globalThis as any).window === 'undefined') {
-      (globalThis as any).window = {};
-    }
-
-    (globalThis as any).window.localStorage = mockLocalStorage;
-    (globalThis as any).window.dispatchEvent = vi.fn();
-    (globalThis as any).window.CustomEvent = class CustomEvent {
-      type: string;
-      detail: any;
-      constructor(type: string, params?: { detail?: any }) {
-        this.type = type;
-        this.detail = params?.detail;
-      }
-    };
-
-    Object.defineProperty(globalThis, 'localStorage', {
-      value: mockLocalStorage,
-      writable: true,
-      configurable: true,
-    });
+    vi.stubGlobal('window', { localStorage: mockLocalStorage, dispatchEvent: vi.fn() });
+    vi.stubGlobal('localStorage', mockLocalStorage);
   });
 
   describe('getStoredProgress', () => {
@@ -65,7 +46,8 @@ describe('Storage Helpers & State Management', () => {
         bookmarkedTopics: {},
         notes: {},
         quizScores: {},
-        theme: 'dark',
+        flashcardReviews: {},
+        theme: 'light',
         hasCelebrated100: false,
       });
     });
@@ -87,7 +69,7 @@ describe('Storage Helpers & State Management', () => {
     it('handles corrupted JSON gracefully without throwing', () => {
       memoryStorage[STORAGE_KEY] = 'INVALID_JSON_CORRUPTED{{{';
       const state = getStoredProgress();
-      expect(state.theme).toBe('dark');
+      expect(state.theme).toBe('light');
       expect(state.completedTopics).toEqual({});
     });
   });
@@ -183,11 +165,11 @@ describe('Storage Helpers & State Management', () => {
   });
 
   describe('Progress and Completion Calculations', () => {
-    it('accurately computes completion percentage across all 67 topics', () => {
-      const totalTopics = 67;
+    it('accurately computes completion percentage across all 73 topics', () => {
+      const totalTopics = 73;
       const completedTopicIds = ['t1', 't2', 't3', 't4'];
       const percentage = Math.round((completedTopicIds.length / totalTopics) * 100);
-      expect(percentage).toBe(6); // 4 / 67 = 5.97% -> 6%
+      expect(percentage).toBe(5); // 4 / 73 = 5.48% -> 5%
     });
 
     it('accurately computes pillar specific progress', () => {

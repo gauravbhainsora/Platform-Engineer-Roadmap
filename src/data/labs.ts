@@ -1,5 +1,6 @@
 import type React from 'react';
 import { Box, Flame, Server } from 'lucide-react';
+import { stripCodeComments, validateKubernetesCriterion } from '@/lib/lab-validation';
 
 export interface LabCriterionValidationResult {
   passed: boolean;
@@ -180,95 +181,9 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 10`,
     criteria: [
-      {
-        id: 'probe-fix',
-        label: 'Fix liveness probe endpoint from /healtzh to /healthz',
-        hint: 'Inspect livenessProbe.httpGet.path and correct the spelling to /healthz or /health.',
-        validate: (code: string) => {
-          if (code.includes('/healtzh')) {
-            return {
-              passed: false,
-              feedback: 'Liveness probe path still has typo "/healtzh". Change it to "/healthz".',
-            };
-          }
-          const hasValidPath = /path:\s*["']?\/(healthz|health)["']?/.test(code);
-          if (!hasValidPath) {
-            return {
-              passed: false,
-              feedback: 'Liveness probe must point to a valid endpoint like "/healthz".',
-            };
-          }
-          return {
-            passed: true,
-            feedback: 'Liveness probe endpoint correctly targets /healthz.',
-          };
-        },
-      },
-      {
-        id: 'memory-fix',
-        label: 'Increase container memory limits to prevent OOMKilled crashes (>= 256Mi or 512Mi)',
-        hint: 'Update resources.limits.memory to 512Mi or 1Gi (must be >= 256Mi).',
-        validate: (code: string) => {
-          const limitSection = code.match(/limits:[\s\S]*?memory:\s*["']?([0-9]+)([a-zA-Z]+)["']?/);
-          if (!limitSection) {
-            return {
-              passed: false,
-              feedback: 'resources.limits.memory is missing or unparseable.',
-            };
-          }
-          const val = parseInt(limitSection[1], 10);
-          const unit = limitSection[2].toLowerCase();
-
-          let megabytes = 0;
-          if (unit.startsWith('g')) megabytes = val * 1024;
-          else if (unit.startsWith('m')) megabytes = val;
-          else if (unit.startsWith('k')) megabytes = val / 1024;
-
-          if (megabytes < 256) {
-            return {
-              passed: false,
-              feedback: `Memory limit is currently ${limitSection[1]}${limitSection[2]}, which is too low to prevent OOMKill. Set to at least 256Mi or 512Mi.`,
-            };
-          }
-          return {
-            passed: true,
-            feedback: `Memory limit increased to ${limitSection[1]}${limitSection[2]} (safely resolves OOMKills).`,
-          };
-        },
-      },
-      {
-        id: 'security-fix',
-        label: 'Harden securityContext (runAsNonRoot: true with non-zero UID)',
-        hint: 'Set runAsNonRoot: true and update runAsUser: 0 to a non-privileged UID like 10001.',
-        validate: (code: string) => {
-          const hasRunAsNonRootTrue = /runasnonroot:\s*true/i.test(code);
-          const hasRunAsRootFalse = /runasnonroot:\s*false/i.test(code);
-          const hasRunAsUserZero = /runasuser:\s*["']?0\b["']?/i.test(code);
-
-          if (hasRunAsRootFalse) {
-            return {
-              passed: false,
-              feedback: 'securityContext still has "runAsNonRoot: false". Change it to "true".',
-            };
-          }
-          if (hasRunAsUserZero) {
-            return {
-              passed: false,
-              feedback: 'securityContext still sets "runAsUser: 0" (root user). Use non-root UID e.g. 10001.',
-            };
-          }
-          if (!hasRunAsNonRootTrue) {
-            return {
-              passed: false,
-              feedback: 'Ensure "runAsNonRoot: true" is explicitly declared in securityContext.',
-            };
-          }
-          return {
-            passed: true,
-            feedback: 'Pod securityContext properly enforces non-root container execution.',
-          };
-        },
-      },
+      { id: 'probe-fix', label: 'Fix container liveness probes', hint: 'Set livenessProbe.httpGet.path to /healthz or /health.', validate: (code) => validateKubernetesCriterion(code, 'probe') },
+      { id: 'memory-fix', label: 'Increase container memory limits to at least 256Mi', hint: 'Set resources.limits.memory to 512Mi or 1Gi.', validate: (code) => validateKubernetesCriterion(code, 'memory') },
+      { id: 'security-fix', label: 'Enforce non-root container execution', hint: 'Set runAsNonRoot: true and runAsUser: 10001.', validate: (code) => validateKubernetesCriterion(code, 'security') },
     ],
     hints: [
       'Examine line 46 under livenessProbe.httpGet: notice the typo "/healtzh" instead of "/healthz".',
@@ -915,8 +830,9 @@ export function validateLabChallenge(
     };
   }
 
+  const activeCode = challenge.language === 'yaml' ? code : stripCodeComments(code, challenge.language);
   const results: CriterionResult[] = challenge.criteria.map((c) => {
-    const outcome = c.validate(code);
+    const outcome = c.validate(activeCode);
     return {
       id: c.id,
       label: c.label,

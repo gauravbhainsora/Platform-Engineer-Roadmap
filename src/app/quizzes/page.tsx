@@ -1,4 +1,3 @@
-import React from 'react';
 import { QuizHub } from '@/components/quiz/QuizHub';
 
 export const metadata = {
